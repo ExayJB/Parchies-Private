@@ -1,0 +1,2838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="Parchies Driver"/>
+  <meta name="theme-color" content="#0A1628"/>
+  <title>Parchies Driver App</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;background:#0F172A;font-family:'Inter',sans-serif;color:#1E293B;}
+:root{
+  --c-navy:#0A1628; --c-navy2:#0D1F3C; --c-cyan:#0284C7; --c-green:#2D7D0A;
+  --c-amber:#B45309; --c-red:#C0321A; --c-text:#0F172A; --c-text2:#374151;
+  --c-text3:#6B7280; --c-border:rgba(0,0,0,.1); --c-bg:#F1F5F9;
+  --r:6px; --r2:10px; --r3:14px; --font:'Inter',sans-serif;
+}
+/* TOPBAR */
+.d-topbar{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  background:var(--c-navy);color:#fff;
+  padding:max(12px,env(safe-area-inset-top)) 16px 12px;
+  display:flex;align-items:center;gap:10px;
+}
+.d-topbar-title{font-size:16px;font-weight:800;flex:1;}
+.d-topbar-sub{font-size:10px;color:rgba(255,255,255,.5);margin-top:1px;}
+.d-status-dot{width:8px;height:8px;border-radius:50%;background:#2D7D0A;flex-shrink:0;}
+/* BOTTOM NAV */
+.d-bottomnav{
+  position:fixed;bottom:0;left:0;right:0;z-index:100;
+  background:#fff;border-top:1px solid var(--c-border);
+  display:grid;grid-template-columns:repeat(5,1fr);
+  padding-bottom:max(8px,env(safe-area-inset-bottom));
+}
+.d-tab{
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  padding:10px 4px 6px;cursor:pointer;border:none;background:none;
+  font-family:var(--font);transition:color .15s;color:var(--c-text3);
+  font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.3px;
+}
+.d-tab.active{color:var(--c-cyan);}
+.d-tab-icon{font-size:20px;line-height:1;}
+/* CONTENT AREA */
+.d-content{
+  position:fixed;top:0;left:0;right:0;bottom:0;
+  padding-top:calc(56px + max(0px,env(safe-area-inset-top)));
+  padding-bottom:calc(64px + max(0px,env(safe-area-inset-bottom)));
+  overflow-y:auto;-webkit-overflow-scrolling:touch;
+  background:#EAECEF;
+}
+/* CARDS */
+.d-card{background:#fff;border-radius:var(--r2);margin:10px 12px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.08);}
+.d-card-header{padding:12px 14px;border-bottom:1px solid var(--c-border);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--c-text2);display:flex;align-items:center;gap:8px;}
+.d-card-body{padding:14px;}
+/* KPI ROW */
+.d-kpi-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 12px;}
+.d-kpi{background:#fff;border-radius:var(--r2);padding:14px;box-shadow:0 1px 4px rgba(0,0,0,.08);}
+.d-kpi-label{font-size:10px;font-weight:600;color:var(--c-text3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;}
+.d-kpi-val{font-size:22px;font-weight:800;color:var(--c-text);}
+/* STATUS BUTTONS */
+.d-status-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.d-status-btn{padding:14px;border-radius:var(--r2);border:2px solid transparent;font-size:13px;font-weight:700;cursor:pointer;text-align:center;background:var(--c-bg);color:var(--c-text2);transition:all .15s;}
+.d-status-btn.active-available{background:#DCFCE7;color:#166534;border-color:#86EFAC;}
+.d-status-btn.active-loaded{background:#FEF9C3;color:#854D0E;border-color:#FDE68A;}
+.d-status-btn.active-in-transit{background:#EFF9FF;color:#0369A1;border-color:#BAE6FD;}
+.d-status-btn.active-home-time{background:#F3E8FF;color:#7E22CE;border-color:#D8B4FE;}
+/* LOAD CARD */
+.d-load-card{background:#fff;border-radius:var(--r2);margin:10px 12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.1);border-left:4px solid var(--c-cyan);}
+.d-route{font-size:18px;font-weight:800;color:#0F172A;line-height:1.2;}
+.d-route-arrow{color:var(--c-cyan);margin:0 6px;}
+/* CHECKLIST */
+.d-check-item{display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid #F1F5F9;}
+.d-check-item:last-child{border-bottom:none;}
+.d-check-box{width:24px;height:24px;border-radius:6px;border:2px solid #CBD5E1;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;cursor:pointer;}
+.d-check-box.done{background:var(--c-green);border-color:var(--c-green);color:#fff;}
+/* TIMELINE */
+.d-timeline{display:flex;flex-direction:column;gap:0;}
+.d-tl-item{display:flex;gap:12px;padding:10px 0;}
+.d-tl-dot{width:10px;height:10px;border-radius:50%;margin-top:4px;flex-shrink:0;}
+.d-tl-line{width:2px;background:#E2E8F0;margin:0 auto;flex-grow:1;}
+/* HOS BAR */
+.d-hos-bar{height:12px;background:#E2E8F0;border-radius:99px;overflow:hidden;margin-top:6px;}
+.d-hos-fill{height:100%;border-radius:99px;transition:width .5s;}
+/* BUTTONS */
+.d-btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:15px;border-radius:var(--r2);border:none;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;width:100%;transition:opacity .15s;}
+.d-btn:active{opacity:.8;}
+.d-btn-primary{background:var(--c-cyan);color:#fff;}
+.d-btn-green{background:var(--c-green);color:#fff;}
+.d-btn-amber{background:#F59E0B;color:#fff;}
+.d-btn-ghost{background:#F1F5F9;color:var(--c-text2);}
+.d-btn-red{background:var(--c-red);color:#fff;}
+/* BADGE */
+.d-badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700;}
+.d-badge-green{background:#DCFCE7;color:#166534;}
+.d-badge-blue{background:#EFF9FF;color:#0369A1;}
+.d-badge-amber{background:#FEF9C3;color:#854D0E;}
+.d-badge-red{background:#FEE2E2;color:#991B1B;}
+/* DVIR */
+.d-dvir-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #F1F5F9;}
+.d-dvir-checkbox{width:26px;height:26px;border-radius:6px;border:2px solid #CBD5E1;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;}
+.d-dvir-checkbox.checked{background:var(--c-green);border-color:var(--c-green);color:#fff;}
+/* LOGIN */
+.d-login{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:30px 24px;background:linear-gradient(135deg,#0A1628 0%,#0D1F3C 100%);}
+/* LIST */
+.d-list-item{padding:14px;border-bottom:1px solid #F1F5F9;display:flex;align-items:center;gap:12px;cursor:pointer;}
+.d-list-item:active{background:#F8FAFC;}
+/* INPUT */
+.d-input{width:100%;padding:14px;border:1.5px solid #E2E8F0;border-radius:var(--r2);font-family:var(--font);font-size:16px;outline:none;margin-bottom:12px;background:#fff;}
+.d-input:focus{border-color:var(--c-cyan);}
+/* SECTION LABEL */
+.d-section{font-size:11px;font-weight:700;color:var(--c-text3);text-transform:uppercase;letter-spacing:.6px;padding:16px 14px 6px;}
+/* TOAST */
+.d-toast{position:fixed;top:max(70px,env(safe-area-inset-top)+70px);left:50%;transform:translateX(-50%);background:#0A1628;color:#fff;padding:10px 20px;border-radius:99px;font-size:13px;font-weight:600;z-index:999;opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap;}
+.d-toast.show{opacity:1;}
+/* PULL TO REFRESH */
+html{overscroll-behavior:none;}
+body{overscroll-behavior:none;}
+
+  /* Photo capture */
+  .d-photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px;}
+  .d-photo-thumb{aspect-ratio:1;border-radius:var(--r);overflow:hidden;background:#F1F5F9;border:1.5px solid #E2E8F0;position:relative;cursor:pointer;}
+  .d-photo-thumb img{width:100%;height:100%;object-fit:cover;}
+  .d-photo-thumb .d-photo-del{position:absolute;top:4px;right:4px;background:rgba(0,0,0,.55);color:#fff;border:none;border-radius:50%;width:22px;height:22px;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+  .d-photo-add{aspect-ratio:1;border-radius:var(--r);border:2px dashed #CBD5E1;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;background:#F8FAFC;color:#94A3B8;font-size:11px;font-weight:600;gap:4px;}
+  .d-photo-add span{font-size:28px;}
+  /* Signature pad */
+  .d-sig-canvas{width:100%;height:180px;border:1.5px solid #E2E8F0;border-radius:var(--r2);background:#fff;display:block;touch-action:none;cursor:crosshair;}
+  .d-sig-canvas.signed{border-color:#2D7D0A;}
+  /* Check call */
+  .d-check-call-card{background:linear-gradient(135deg,#0A1628,#0D1F3C);border-radius:var(--r2);margin:0 12px 8px;padding:16px;color:#fff;}
+  /* Photo modal */
+  .d-photo-modal{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  .d-photo-modal img{max-width:100%;max-height:80vh;border-radius:var(--r2);}
+
+  /* DVIR media */
+  .d-dvir-type-bar{display:grid;grid-template-columns:1fr 1fr;gap:0;border-radius:var(--r2);overflow:hidden;border:1.5px solid #E2E8F0;margin-bottom:12px;}
+  .d-dvir-type-btn{padding:12px;text-align:center;font-size:13px;font-weight:700;cursor:pointer;background:#F8FAFC;color:var(--c-text3);border:none;font-family:var(--font);}
+  .d-dvir-type-btn.active{background:#0A1628;color:#fff;}
+  .d-dvir-media-row{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;}
+  .d-dvir-media-thumb{width:60px;height:60px;border-radius:6px;overflow:hidden;position:relative;flex-shrink:0;cursor:pointer;}
+  .d-dvir-media-thumb img,.d-dvir-media-thumb video{width:100%;height:100%;object-fit:cover;}
+  .d-dvir-media-thumb .d-media-del{position:absolute;top:2px;right:2px;background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:50%;width:18px;height:18px;font-size:9px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;}
+  .d-dvir-media-thumb .d-video-badge{position:absolute;bottom:2px;left:2px;background:rgba(0,0,0,.6);color:#fff;font-size:8px;font-weight:700;padding:1px 4px;border-radius:3px;}
+  .d-dvir-add-media{display:flex;gap:6px;margin-top:8px;}
+  .d-dvir-add-btn{flex:1;padding:9px 6px;border:1.5px dashed #CBD5E1;border-radius:6px;background:#F8FAFC;color:#94A3B8;font-size:11px;font-weight:700;cursor:pointer;text-align:center;display:flex;flex-direction:column;align-items:center;gap:3px;}
+  .d-dvir-add-btn span{font-size:18px;}
+  .d-dvir-item-expanded{background:#FFFBEB;border-radius:6px;padding:8px;margin-top:6px;border:1px solid #FDE68A;}
+  .d-progress-bar{height:6px;background:#E2E8F0;border-radius:99px;overflow:hidden;margin:8px 0;}
+  .d-progress-fill{height:100%;border-radius:99px;transition:width .3s;}
+
+  /* Push notification banner */
+  .d-notif-banner{
+    position:fixed;top:max(10px,env(safe-area-inset-top));left:50%;
+    transform:translateX(-50%) translateY(-120%);
+    background:#0A1628;color:#fff;border:1px solid rgba(2,132,199,.4);
+    border-radius:14px;padding:14px 16px;z-index:9999;
+    display:flex;align-items:flex-start;gap:12px;
+    box-shadow:0 8px 32px rgba(0,0,0,.5);
+    max-width:340px;width:calc(100vw - 32px);
+    transition:transform .35s cubic-bezier(.34,1.56,.64,1);
+    font-family:-apple-system,Inter,sans-serif;
+  }
+  .d-notif-banner.show{transform:translateX(-50%) translateY(0);}
+  .d-notif-icon{font-size:26px;flex-shrink:0;margin-top:1px;}
+  .d-notif-body{flex:1;min-width:0;}
+  .d-notif-title{font-size:13px;font-weight:800;margin-bottom:3px;}
+  .d-notif-msg{font-size:12px;color:rgba(255,255,255,.7);line-height:1.4;}
+  .d-notif-actions{display:flex;gap:8px;margin-top:10px;}
+  .d-notif-btn{padding:7px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;border:none;font-family:inherit;}
+  .d-notif-accept{background:#2D7D0A;color:#fff;}
+  .d-notif-view{background:#0284C7;color:#fff;}
+  .d-notif-dismiss{background:rgba(255,255,255,.1);color:rgba(255,255,255,.6);}
+  /* Notification permission prompt */
+  .d-perm-bar{
+    position:fixed;bottom:calc(64px + max(0px,env(safe-area-inset-bottom)));
+    left:12px;right:12px;background:#0A1628;color:#fff;
+    border:1px solid rgba(2,132,199,.3);border-radius:12px;
+    padding:14px;z-index:200;display:flex;align-items:center;gap:12px;
+    font-family:-apple-system,Inter,sans-serif;
+  }
+  /* Bell icon on topbar */
+  .d-notif-bell{
+    position:relative;background:rgba(255,255,255,.08);
+    border:none;border-radius:8px;color:#fff;width:32px;height:32px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:15px;cursor:pointer;flex-shrink:0;
+  }
+  .d-notif-bell .d-bell-badge{
+    position:absolute;top:-4px;right:-4px;background:#C0321A;
+    color:#fff;font-size:8px;font-weight:800;border-radius:99px;
+    min-width:14px;height:14px;display:flex;align-items:center;
+    justify-content:center;padding:0 3px;border:1.5px solid #0A1628;
+  }
+
+  /* Weather card */
+  .d-weather-hero{background:linear-gradient(135deg,#0A1628,#0D2B4E);border-radius:var(--r2);margin:10px 12px;padding:20px;color:#fff;overflow:hidden;position:relative;}
+  .d-weather-temp{font-size:64px;font-weight:900;line-height:1;color:#fff;}
+  .d-weather-row{display:flex;gap:8px;margin:10px 12px 0;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+  .d-weather-row::-webkit-scrollbar{display:none;}
+  .d-weather-day{background:#fff;border-radius:var(--r2);padding:12px 10px;text-align:center;flex-shrink:0;width:80px;box-shadow:0 1px 4px rgba(0,0,0,.08);}
+  .d-weather-alert{background:#FEF9C3;border:1px solid #FDE68A;border-radius:var(--r2);margin:8px 12px;padding:12px 14px;display:flex;gap:10px;align-items:flex-start;}
+  /* Fuel finder */
+  .d-fuel-stop{background:#fff;border-radius:var(--r2);margin:6px 12px;padding:14px;box-shadow:0 1px 4px rgba(0,0,0,.08);display:flex;align-items:center;gap:12px;}
+  .d-fuel-price{font-size:22px;font-weight:900;color:#0284C7;flex-shrink:0;width:60px;text-align:right;}
+  .d-fuel-badge{display:inline-flex;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;}
+  .d-fuel-network{background:#EFF9FF;color:#0369A1;}
+  .d-fuel-cheap{background:#DCFCE7;color:#166534;}
+  /* Chat */
+  .d-chat-bubble{max-width:80%;border-radius:18px;padding:10px 14px;font-size:14px;line-height:1.4;margin-bottom:2px;}
+  .d-chat-mine{background:#0284C7;color:#fff;border-bottom-right-radius:4px;align-self:flex-end;}
+  .d-chat-theirs{background:#fff;color:var(--c-text);border-bottom-left-radius:4px;align-self:flex-start;box-shadow:0 1px 3px rgba(0,0,0,.08);}
+  .d-chat-time{font-size:10px;color:var(--c-text3);margin:0 4px 8px;}
+  .d-chat-messages{display:flex;flex-direction:column;padding:10px 14px;gap:4px;}
+  .d-chat-input-bar{position:sticky;bottom:0;background:#fff;border-top:1px solid var(--c-border);padding:10px 12px;display:flex;gap:8px;align-items:flex-end;}
+  /* Reminders */
+  .d-remind-item{background:#fff;border-radius:var(--r2);margin:6px 12px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.08);}
+  .d-remind-bar{height:4px;}
+  .d-remind-body{padding:12px 14px;}
+  /* Tool nav pills */
+  .d-tool-pills{display:flex;gap:8px;padding:10px 12px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+  .d-tool-pills::-webkit-scrollbar{display:none;}
+  .d-tool-pill{flex-shrink:0;padding:8px 16px;border-radius:99px;font-size:12px;font-weight:700;cursor:pointer;border:none;font-family:var(--font);transition:all .15s;}
+  .d-tool-pill.active{background:#0A1628;color:#fff;}
+  .d-tool-pill:not(.active){background:#fff;color:var(--c-text2);border:1px solid #E2E8F0;}
+</style>
+</head>
+<body>
+<div class="d-toast" id="d-toast"></div>
+
+<div id="d-app">
+  <!-- Login Screen -->
+  <div id="d-login" class="d-login">
+    <div style="margin-bottom:32px;text-align:center">
+      <div style="font-size:64px;margin-bottom:12px">🚛</div>
+      <div style="font-size:24px;font-weight:800;color:#fff">Parchies Enterprises</div>
+      <div style="font-size:13px;color:rgba(255,255,255,.5);margin-top:4px">Driver App</div>
+    </div>
+    <div style="width:100%;max-width:360px">
+      <select id="d-driver-select" class="d-input" style="background:#fff">
+        <option value="">👇 Tap to choose your name...</option>
+      </select>
+      <input type="password" id="d-pin" class="d-input" placeholder="Enter PIN (use 0000)" maxlength="6" inputmode="numeric"/>
+      <button class="d-btn d-btn-primary" onclick="driverLogin()" style="margin-top:4px">Sign In →</button>
+      <div style="background:rgba(255,255,255,.07);border-radius:10px;padding:14px;margin-top:16px;text-align:left">
+  <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.7);margin-bottom:8px">🔑 How to Sign In</div>
+  <div style="font-size:12px;color:rgba(255,255,255,.5);line-height:1.8">
+    1. Select your name from the list<br>
+    2. Enter PIN: <strong style="color:rgba(255,255,255,.8)">0000</strong><br>
+    3. Tap Sign In
+  </div>
+</div>
+<div style="text-align:center;color:rgba(255,255,255,.2);font-size:10px;margin-top:12px">Parchies Enterprises LLC · Driver App</div>
+    </div>
+  </div>
+
+  <!-- Main App (hidden until login) -->
+  <div id="d-main" style="display:none">
+    <!-- Topbar -->
+    <div class="d-topbar">
+      <div class="d-status-dot" id="d-status-dot"></div>
+      <div style="flex:1">
+        <div class="d-topbar-title" id="d-driver-name">Driver</div>
+        <div class="d-topbar-sub" id="d-driver-unit">Loading...</div>
+      </div>
+      <div id="d-topbar-badge" style="font-size:11px;font-weight:700;padding:4px 10px;border-radius:99px;background:rgba(255,255,255,.1);color:rgba(255,255,255,.8)"></div>
+      <button class="d-notif-bell" onclick="openNotifHistory()" id="d-bell-btn" title="Notifications">
+        🔔<span class="d-bell-badge" id="d-bell-count" style="display:none">0</span>
+      </button>
+    </div>
+
+    <!-- Content -->
+    <div class="d-content" id="d-content"></div>
+
+    <!-- Bottom Nav -->
+    <div class="d-bottomnav">
+      <button class="d-tab active" onclick="showScreen('home')" id="tab-home">
+        <span class="d-tab-icon">🏠</span>Home
+      </button>
+      <button class="d-tab" onclick="showScreen('load')" id="tab-load">
+        <span class="d-tab-icon">📦</span>My Load
+      </button>
+      <button class="d-tab" onclick="showScreen('dvir')" id="tab-dvir">
+        <span class="d-tab-icon">✅</span>DVIR
+      </button>
+      <button class="d-tab" onclick="showScreen('history')" id="tab-history">
+        <span class="d-tab-icon">📋</span>History
+      </button>
+      <button class="d-tab" onclick="showScreen('tools')" id="tab-tools">
+        <span class="d-tab-icon">🛠</span>Tools
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+
+// ─── EMBEDDED DRIVER DATA (from office TMS) ──────────────────
+const EMBEDDED_DRIVERS = [
+    {id:'MJ74821',name:'Marcus Johnson',phone:'(770) 555-0101',email:'m.johnson@parchies.com',
+      dob:'1985-07-14',ssn:'XXX-XX-4821',
+      address:'412 Riverside Dr',city:'Carnesville',addrState:'GA',zip:'30521',
+      cdl:'GA12345678',cdlClass:'A',cdlState:'GA',cdlExpiry:'2026-03-15',medExpiry:'2025-11-30',hazmat:'Yes',
+      roadTestDate:'2023-03-28',roadTestResult:'Pass',pspDate:'2023-03-20',orientationDate:'2023-04-01',
+      csaScore:12,twicCard:'TWC-10294-88',twicExpiry:'2027-06-30',
+      mvrDate:'2024-04-01',mvrResult:'Clean',nextDrugTest:'2025-09-01',
+      driverType:'Company Driver',payType:'percentage',payRate:28,settlementCycle:'Weekly',
+      w9OnFile:'yes',lastSent1099:'2025-01-15',
+      bankName:'Chase',bankRouting:'021000021',bankAccount:'XXXX4821',bankAccountType:'Checking',
+      hireDate:'2023-04-01',status:'Active',dispatchStatus:'In Transit',terminal:'Carnesville, GA',
+      tractor:'TRK001',trailer:'TRL001',homeTime:'2025-05-20',
+      eldDeviceId:'SAM-ELD-10041',prepassId:'PP-4421-88',ezpassId:'EZP-99124',efsFuelCard:'EFS-4821',
+      endorsements:['H','N'],preferredLanes:'Southeast, Mid-Atlantic',
+      applicationDate:'2023-03-28',certViolationsDate:'2024-04-01',preEmployDrugResult:'Negative',preEmployDrugDate:'2023-03-30',prevEmployerInquiry:'2023-03-25',annualReviewDate:'2024-04-01',backgroundCheckDate:'2023-03-25',backgroundCheckResult:'Clear',emergencyContact:'Sharon Johnson',emergencyPhone:'(770) 555-9901',emergencyRel:'Spouse',
+      perfRating:4.8,avgMpg:6.8,homeTimeFreq:'Weekly',notes:'Excellent driver, 2 years no incidents.',
+      customFields:[],
+      assignmentHistory:[
+        {date:'2023-04-01',tractor:'TRK003',trailer:'TRL003',notes:'Initial assignment'},
+        {date:'2024-01-15',tractor:'TRK001',trailer:'TRL001',notes:'Upgraded to new unit'},
+      ],
+      documents:[
+        {id:'DDOC001',type:'CDL',name:'CDL — Marcus Johnson',uploadDate:'2023-04-01',notes:'Class A · GA · Expires Mar 2026',url:''},
+        {id:'DDOC002',type:'Medical Card',name:'DOT Medical Certificate',uploadDate:'2023-11-30',notes:'Expires Nov 2025',url:''},
+        {id:'DDOC003',type:'MVR',name:'MVR Pull — 2024',uploadDate:'2024-04-01',notes:'Clean record',url:''},
+      ]},
+    {id:'DW36190',name:'Darius Williams',phone:'(770) 555-0102',email:'d.williams@parchies.com',
+      dob:'1990-03-22',ssn:'XXX-XX-2290',
+      address:'88 Peachtree Ct',city:'Atlanta',addrState:'GA',zip:'30301',
+      cdl:'GA23456789',cdlClass:'A',cdlState:'GA',cdlExpiry:'2025-09-22',medExpiry:'2026-02-14',hazmat:'No',
+      roadTestDate:'2022-08-10',roadTestResult:'Pass',pspDate:'2022-08-01',orientationDate:'2022-08-15',
+      csaScore:28,twicCard:'',twicExpiry:'',
+      mvrDate:'2024-08-15',mvrResult:'Minor Violations',nextDrugTest:'2025-11-01',
+      driverType:'Company Driver',payType:'percentage',payRate:28,settlementCycle:'Weekly',
+      w9OnFile:'yes',lastSent1099:'2025-01-15',
+      bankName:'Wells Fargo',bankRouting:'121000248',bankAccount:'XXXX2290',bankAccountType:'Checking',
+      hireDate:'2022-08-15',status:'Active',dispatchStatus:'Available',terminal:'Carnesville, GA',
+      tractor:'TRK002',trailer:'TRL002',homeTime:'2025-05-14',
+      eldDeviceId:'SAM-ELD-10042',prepassId:'PP-3310-55',ezpassId:'',efsFuelCard:'EFS-2290',
+      endorsements:[],preferredLanes:'Southeast, Midwest',
+      applicationDate:'2022-08-01',certViolationsDate:'2024-08-15',preEmployDrugResult:'Negative',preEmployDrugDate:'2022-08-05',prevEmployerInquiry:'2022-08-02',annualReviewDate:'2024-08-15',backgroundCheckDate:'2022-08-02',backgroundCheckResult:'Clear',emergencyContact:'Keisha Williams',emergencyPhone:'(770) 555-9902',emergencyRel:'Wife',
+      perfRating:4.1,avgMpg:6.5,homeTimeFreq:'Weekly',notes:'1 minor speeding violation on MVR — monitored.',
+      customFields:[],
+      assignmentHistory:[{date:'2022-08-15',tractor:'TRK002',trailer:'TRL002',notes:'Initial assignment'}],
+      documents:[
+        {id:'DDOC004',type:'CDL',name:'CDL — Darius Williams',uploadDate:'2022-08-15',notes:'Class A · GA',url:''},
+        {id:'DDOC005',type:'Application',name:'Driver Application',uploadDate:'2022-08-01',notes:'Signed & notarized',url:''},
+      ]},
+    {id:'LB58234',name:'Latoya Brooks',phone:'(706) 555-0103',email:'l.brooks@parchies.com',
+      dob:'1988-11-08',ssn:'XXX-XX-6615',
+      address:'220 Old Mill Rd',city:'Anderson',addrState:'SC',zip:'29621',
+      cdl:'SC34567890',cdlClass:'A',cdlState:'SC',cdlExpiry:'2027-01-10',medExpiry:'2026-07-20',hazmat:'Yes',
+      roadTestDate:'2024-01-15',roadTestResult:'Pass',pspDate:'2024-01-08',orientationDate:'2024-01-20',
+      csaScore:8,twicCard:'TWC-66150-22',twicExpiry:'2028-03-15',
+      mvrDate:'2024-01-20',mvrResult:'Clean',nextDrugTest:'2025-07-20',
+      driverType:'Company Driver',payType:'percentage',payRate:28,settlementCycle:'Weekly',
+      w9OnFile:'yes',lastSent1099:'2025-01-15',
+      bankName:'Bank of America',bankRouting:'026009593',bankAccount:'XXXX6615',bankAccountType:'Checking',
+      hireDate:'2024-01-20',status:'Active',dispatchStatus:'Loaded',terminal:'Carnesville, GA',
+      tractor:'TRK003',trailer:'TRL003',homeTime:'2025-05-22',
+      eldDeviceId:'SAM-ELD-10043',prepassId:'PP-7741-22',ezpassId:'EZP-66150',efsFuelCard:'EFS-6615',
+      endorsements:['H','T'],preferredLanes:'Southeast, Northeast',
+      applicationDate:'2024-01-05',certViolationsDate:'2025-01-20',preEmployDrugResult:'Negative',preEmployDrugDate:'2024-01-10',prevEmployerInquiry:'2024-01-06',annualReviewDate:'2025-01-20',backgroundCheckDate:'2024-01-06',backgroundCheckResult:'Clear',emergencyContact:'James Brooks',emergencyPhone:'(706) 555-9903',emergencyRel:'Brother',
+      perfRating:4.6,avgMpg:6.7,homeTimeFreq:'Bi-Weekly',notes:'Reefer certified. Preferred for temperature-sensitive loads. TWIC valid for port access.',
+      customFields:[{label:'Reefer Cert',value:'ThermoCare Level 2'}],
+      assignmentHistory:[{date:'2024-01-20',tractor:'TRK003',trailer:'TRL003',notes:'Initial assignment'}],
+      documents:[]},
+    {id:'RC91047',name:'Reginald Carter',phone:'(770) 555-0104',email:'r.carter@parchies.com',
+      dob:'1979-05-30',ssn:'XXX-XX-4104',
+      address:'3301 Buford Hwy',city:'Buford',addrState:'GA',zip:'30518',
+      cdl:'GA45678901',cdlClass:'A',cdlState:'GA',cdlExpiry:'2024-11-05',medExpiry:'2025-06-30',hazmat:'No',
+      roadTestDate:'2021-06-05',roadTestResult:'Pass',pspDate:'2021-06-01',orientationDate:'2021-06-10',
+      csaScore:41,twicCard:'',twicExpiry:'',
+      mvrDate:'2023-06-10',mvrResult:'Clean',nextDrugTest:'2025-06-10',
+      driverType:'Company Driver',payType:'percentage',payRate:28,settlementCycle:'Weekly',
+      w9OnFile:'yes',lastSent1099:'2025-01-15',
+      bankName:'Regions',bankRouting:'062000019',bankAccount:'XXXX4104',bankAccountType:'Checking',
+      hireDate:'2021-06-10',status:'Active',dispatchStatus:'In Transit',terminal:'Carnesville, GA',
+      tractor:'TRK004',trailer:'TRL004',homeTime:'2025-05-18',
+      eldDeviceId:'SAM-ELD-10044',prepassId:'PP-4104-77',ezpassId:'',efsFuelCard:'EFS-4104',
+      endorsements:[],preferredLanes:'Southeast, Texas',
+      applicationDate:'2021-06-01',certViolationsDate:'2024-06-10',preEmployDrugResult:'Negative',preEmployDrugDate:'2021-06-05',prevEmployerInquiry:'2021-06-02',annualReviewDate:'2024-06-10',backgroundCheckDate:'2021-06-02',backgroundCheckResult:'Clear',emergencyContact:'Diane Carter',emergencyPhone:'(770) 555-9904',emergencyRel:'Mother',
+      perfRating:3.8,avgMpg:6.2,homeTimeFreq:'Weekly',notes:'CDL EXPIRED — renewal in progress. Follow up immediately.',
+      customFields:[],
+      assignmentHistory:[
+        {date:'2021-06-10',tractor:'TRK005',trailer:'TRL004',notes:'Initial assignment'},
+        {date:'2022-03-01',tractor:'TRK004',trailer:'TRL004',notes:'TRK005 sent to shop'},
+      ],
+      documents:[]},
+    {id:'TS62803',name:'Tamika Simmons',phone:'(706) 555-0105',email:'t.simmons@parchies.com',
+      dob:'1992-09-17',ssn:'XXX-XX-5105',
+      address:'55 Maple Grove Ln',city:'Greenville',addrState:'SC',zip:'29601',
+      cdl:'TN56789012',cdlClass:'A',cdlState:'TN',cdlExpiry:'2026-08-18',medExpiry:'2026-01-25',hazmat:'No',
+      roadTestDate:'2023-11-01',roadTestResult:'Pass',pspDate:'2023-10-28',orientationDate:'2023-11-05',
+      csaScore:5,twicCard:'',twicExpiry:'',
+      mvrDate:'2023-11-05',mvrResult:'Clean',nextDrugTest:'2025-11-05',
+      driverType:'Company Driver',payType:'percentage',payRate:28,settlementCycle:'Weekly',
+      w9OnFile:'no',lastSent1099:'',
+      bankName:'',bankRouting:'',bankAccount:'',bankAccountType:'Checking',
+      hireDate:'2023-11-05',status:'On Leave',dispatchStatus:'Off Duty',terminal:'Carnesville, GA',
+      tractor:'',trailer:'',homeTime:'2025-06-01',
+      eldDeviceId:'',prepassId:'PP-5105-33',ezpassId:'',efsFuelCard:'EFS-5105',
+      endorsements:[],preferredLanes:'Southeast',
+      applicationDate:'2023-10-28',certViolationsDate:'2024-11-05',preEmployDrugResult:'Negative',preEmployDrugDate:'2023-11-01',prevEmployerInquiry:'2023-10-29',annualReviewDate:'2024-11-05',backgroundCheckDate:'2023-10-29',backgroundCheckResult:'Clear',emergencyContact:'Carl Simmons',emergencyPhone:'(706) 555-9905',emergencyRel:'Father',
+      perfRating:4.5,avgMpg:6.9,homeTimeFreq:'Weekly',notes:'On medical leave. W-9 needed before return.',
+      customFields:[],
+      assignmentHistory:[{date:'2023-11-05',tractor:'TRK005',trailer:'TRL005',notes:'Initial — now on leave, unassigned'}],
+      documents:[]},
+  ];
+const EMBEDDED_LOADS   = [
+    {id:'LD2025001',date:'2025-01-05',driverId:'MJ74821',tractor:'TRK001',trailer:'TRL001',origin:'Atlanta, GA',dest:'Charlotte, NC',miles:493,gross:1892.22,fsc:151.38,detention:0,otherCosts:0,status:'Delivered',broker:'XPO Logistics',poNum:'XPO-88821',invoiced:true,invoiceDate:'2025-01-08',paid:true,paidDate:'2025-01-28',bolNumber:'BOL-XPO-88821',commodity:'General Freight',weight:42000,pieces:24,podStatus:'Received',podUploadedDate:'2025-01-06',podUploadedBy:'MJ74821',podNotes:'Signed J.Smith 14:32',pod:[]},
+    {id:'LD2025002',date:'2025-01-08',driverId:'DW36190',tractor:'TRK002',trailer:'TRL002',origin:'Atlanta, GA',dest:'Nashville, TN',miles:237,gross:907.96,fsc:72.64,detention:300,otherCosts:0,status:'Delivered',broker:'Echo Global',poNum:'ECH-44102',invoiced:true,invoiceDate:'2025-01-11',paid:true,paidDate:'2025-02-01',bolNumber:'BOL-ECH-44102',commodity:'Auto Parts',weight:38500,pieces:18,podStatus:'Received',podUploadedDate:'2025-01-09',podUploadedBy:'DW36190',podNotes:'Delivery complete dock 7',pod:[]},
+    {id:'LD2025003',date:'2025-01-09',driverId:'LB58234',tractor:'TRK003',trailer:'TRL003',origin:'Carnesville, GA',dest:'Richmond, VA',miles:665,gross:2254.81,fsc:180.38,detention:0,otherCosts:0,status:'Delivered',broker:'Coyote Logistics',poNum:'COY-73345',invoiced:true,invoiceDate:'2025-01-12',paid:true,paidDate:'2025-02-10',bolNumber:'BOL-COY-73345',commodity:'Electronics',weight:31200,pieces:48,podStatus:'Received',podUploadedDate:'2025-01-10',podUploadedBy:'LB58234',podNotes:'',pod:[]},
+    {id:'LD2025004',date:'2025-01-11',driverId:'RC91047',tractor:'TRK004',trailer:'TRL004',origin:'Atlanta, GA',dest:'Miami, FL',miles:657,gross:2053.60,fsc:164.29,detention:300,otherCosts:0,status:'Delivered',broker:'CH Robinson',poNum:'CHR-29918',invoiced:true,invoiceDate:'2025-01-15',paid:true,paidDate:'2025-02-12',bolNumber:'BOL-CHR-29918',commodity:'Food Grade',weight:44000,pieces:36,podStatus:'Received',podUploadedDate:'2025-01-12',podUploadedBy:'RC91047',podNotes:'Temp maintained throughout',pod:[]},
+    {id:'LD2025005',date:'2025-01-13',driverId:'MJ74821',tractor:'TRK001',trailer:'TRL001',origin:'Charlotte, NC',dest:'Chicago, IL',miles:781,gross:2404.21,fsc:192.34,detention:300,otherCosts:0,status:'Delivered',broker:'XPO Logistics',poNum:'XPO-89034',invoiced:true,invoiceDate:'2025-01-16',paid:true,paidDate:'2025-02-15',bolNumber:'BOL-XPO-89034',commodity:'General Freight',weight:40200,pieces:22,podStatus:'Received',podUploadedDate:'2025-01-14',podUploadedBy:'MJ74821',podNotes:'',pod:[]},
+    {id:'LD2025006',date:'2025-01-15',driverId:'DW36190',tractor:'TRK002',trailer:'TRL002',origin:'Nashville, TN',dest:'Dallas, TX',miles:675,gross:2552.54,fsc:204.20,detention:0,otherCosts:0,status:'Delivered',broker:'Convoy',poNum:'CNV-11203',invoiced:true,invoiceDate:'2025-01-19',paid:true,paidDate:'2025-02-18',bolNumber:'BOL-CNV-11203',commodity:'Industrial',weight:43800,pieces:12,podStatus:'Received',podUploadedDate:'2025-01-16',podUploadedBy:'DW36190',podNotes:'Short 1 pallet - noted on BOL',pod:[]},
+    {id:'LD2025007',date:'2025-01-17',driverId:'LB58234',tractor:'TRK003',trailer:'TRL003',origin:'Atlanta, GA',dest:'Baltimore, MD',miles:771,gross:2620.48,fsc:209.64,detention:150,otherCosts:0,status:'Delivered',broker:'Echo Global',poNum:'ECH-44398',invoiced:true,invoiceDate:'2025-01-20',paid:false,paidDate:'',bolNumber:'BOL-ECH-44398',commodity:'General Freight',weight:39500,pieces:30,podStatus:'Pending',podUploadedDate:'',podUploadedBy:'',podNotes:'',pod:[]},
+    {id:'LD2025008',date:'2025-01-20',driverId:'RC91047',tractor:'TRK004',trailer:'TRL004',origin:'Charlotte, NC',dest:'Boston, MA',miles:987,gross:3847.47,fsc:307.80,detention:0,otherCosts:0,status:'Delivered',broker:'Transplace',poNum:'TRP-88201',invoiced:true,invoiceDate:'2025-01-24',paid:false,paidDate:'',bolNumber:'BOL-TRP-88201',commodity:'Retail',weight:41000,pieces:52,podStatus:'Pending',podUploadedDate:'',podUploadedBy:'',podNotes:'',pod:[]},
+    {id:'LD2025009',date:'2025-01-22',driverId:'MJ74821',tractor:'TRK001',trailer:'TRL001',origin:'Atlanta, GA',dest:'Nashville, TN',miles:265,gross:905.71,fsc:72.46,detention:150,otherCosts:0,status:'Delivered',broker:'CH Robinson',poNum:'CHR-30112',invoiced:true,invoiceDate:'2025-01-25',paid:false,paidDate:'',bolNumber:'BOL-CHR-30112',commodity:'General Freight',weight:36000,pieces:20,podStatus:'Received',podUploadedDate:'2025-01-23',podUploadedBy:'MJ74821',podNotes:'',pod:[]},
+    {id:'LD2025010',date:'2025-01-25',driverId:'DW36190',tractor:'TRK002',trailer:'TRL002',origin:'Carnesville, GA',dest:'Richmond, VA',miles:633,gross:2376.35,fsc:190.11,detention:0,otherCosts:0,status:'Delivered',broker:'Coyote Logistics',poNum:'COY-73901',invoiced:false,invoiceDate:'',paid:false,paidDate:'',bolNumber:'BOL-COY-73901',commodity:'Machinery',weight:44800,pieces:8,podStatus:'Missing',podUploadedDate:'',podUploadedBy:'',podNotes:'Driver has not uploaded - follow up',pod:[]},
+    {id:'LD2025011',date:'2025-02-02',driverId:'LB58234',tractor:'TRK003',trailer:'TRL003',origin:'Atlanta, GA',dest:'Miami, FL',miles:668,gross:2376.18,fsc:190.09,detention:300,otherCosts:0,status:'Delivered',broker:'XPO Logistics',poNum:'XPO-89211',invoiced:false,invoiceDate:'',paid:false,paidDate:'',bolNumber:'BOL-XPO-89211',commodity:'Food Grade',weight:43200,pieces:44,podStatus:'Missing',podUploadedDate:'',podUploadedBy:'',podNotes:'',pod:[]},
+    {id:'LD2025012',date:'2025-02-05',driverId:'RC91047',tractor:'TRK004',trailer:'TRL004',origin:'Charlotte, NC',dest:'Chicago, IL',miles:745,gross:2870.04,fsc:229.60,detention:0,otherCosts:0,status:'Delivered',broker:'Convoy',poNum:'CNV-11498',invoiced:false,invoiceDate:'',paid:false,paidDate:'',bolNumber:'BOL-CNV-11498',commodity:'General Freight',weight:38800,pieces:28,podStatus:'Received',podUploadedDate:'2025-02-06',podUploadedBy:'RC91047',podNotes:'',pod:[]},
+    {id:'LD2025020',date:'2025-03-15',driverId:'MJ74821',tractor:'TRK001',trailer:'TRL001',origin:'Atlanta, GA',dest:'Miami, FL',miles:660,gross:2376.36,fsc:190.11,detention:0,otherCosts:0,status:'Delivered',broker:'Echo Global',poNum:'ECH-45021',invoiced:true,invoiceDate:'2025-03-18',paid:true,paidDate:'2025-04-15',bolNumber:'BOL-ECH-45021',commodity:'Electronics',weight:40100,pieces:36,podStatus:'Received',podUploadedDate:'2025-03-16',podUploadedBy:'MJ74821',podNotes:'',pod:[]},
+    {id:'LD2025025',date:'2025-05-15',driverId:'DW36190',tractor:'TRK002',trailer:'TRL002',origin:'Miami, FL',dest:'Chicago, IL',miles:1378,gross:5236.40,fsc:418.91,detention:200,otherCosts:0,actualPickupTime:'2025-05-18T06:48:00',actualDeliveryTime:'2025-05-20T15:48:00',actualFuelCost:418.92,status:'Delivered',broker:'Coyote Logistics',poNum:'COY-74410',bolNumber:'BOL-COY-74410',commodity:'General Freight',weight:41000,pieces:32,sealNumber:'SL-COY-74410',customerRef:'CUST-COY-74410',scaleTicket:'ST-2290',deadheadMiles:62,pickupAppt:'2025-05-18T06:00',deliveryAppt:'2025-05-20T16:00',shipperName:'Miami Coyote Shipper',shipperContact:'Loading Dock · (305) 555-1100',consigneeName:'Chicago Distribution Hub',consigneeContact:'John Martinez · (312) 555-9900',podStatus:'Received',podUploadedDate:'2025-05-20',podUploadedBy:'DW36190',podNotes:'Signed J.Martinez dock 7',pod:[],invoiced:true,invoiceDate:'2025-05-21',paid:false,paidDate:'',
+      statusHistory:[
+        {status:'Pending',date:'2025-05-15T08:00:00',by:'Dispatcher'},
+        {status:'Loaded',date:'2025-05-18T06:30:00',by:'DW36190'},
+        {status:'In Transit',date:'2025-05-18T07:15:00',by:'DW36190'},
+        {status:'Delivered',date:'2025-05-20T15:48:00',by:'DW36190'},
+      ]},
+    {id:'LD2025026',date:'2025-05-01',driverId:'LB58234',tractor:'TRK003',trailer:'TRL003',origin:'Nashville, TN',dest:'Dallas, TX',miles:660,gross:2534.28,fsc:202.74,detention:150,otherCosts:0,actualPickupTime:'2025-05-19T14:55:00',actualDeliveryTime:'',actualFuelCost:0,status:'In Transit',broker:'CH Robinson',poNum:'CHR-31205',bolNumber:'BOL-CHR-31205',commodity:'Industrial Equipment',weight:43500,pieces:6,sealNumber:'SL-CHR-31205',customerRef:'CUST-CHR-31205',scaleTicket:'',deadheadMiles:28,pickupAppt:'2025-05-19T14:00',deliveryAppt:'2025-05-22T10:00',shipperName:'Nashville Industrial Supply',shipperContact:'Loading Dock · (615) 555-3300',consigneeName:'Dallas Machinery Corp',consigneeContact:'Receiving Mgr · (214) 555-7700',podStatus:'Pending',podUploadedDate:'',podUploadedBy:'',podNotes:'',pod:[],invoiced:false,invoiceDate:'',paid:false,paidDate:'',
+      statusHistory:[
+        {status:'Pending',date:'2025-05-01T09:00:00',by:'Dispatcher'},
+        {status:'Loaded',date:'2025-05-19T14:10:00',by:'LB58234'},
+        {status:'In Transit',date:'2025-05-19T14:55:00',by:'LB58234'},
+      ]},
+    {id:'LD2025027',date:'2025-05-05',driverId:'RC91047',tractor:'TRK004',trailer:'TRL004',origin:'Atlanta, GA',dest:'Baltimore, MD',miles:752,gross:2858.48,fsc:228.68,detention:0,otherCosts:0,actualPickupTime:'2025-05-19T11:05:00',actualDeliveryTime:'',actualFuelCost:0,status:'In Transit',broker:'Coyote Logistics',poNum:'COY-74322',bolNumber:'BOL-COY-74322',commodity:'Retail Goods',weight:39800,pieces:44,sealNumber:'SL-COY-74322',customerRef:'CUST-COY-74322',scaleTicket:'ST-4104',deadheadMiles:15,pickupAppt:'2025-05-19T10:00',deliveryAppt:'2025-05-21T16:00',shipperName:'Atlanta Coyote Shipper',shipperContact:'Mike T · (404) 555-4400',consigneeName:'Baltimore DC',consigneeContact:'Dock Supe · (410) 555-6600',podStatus:'Pending',podUploadedDate:'',podUploadedBy:'',podNotes:'',pod:[],invoiced:false,invoiceDate:'',paid:false,paidDate:'',
+      statusHistory:[
+        {status:'Pending',date:'2025-05-05T10:00:00',by:'Dispatcher'},
+        {status:'Loaded',date:'2025-05-19T10:22:00',by:'RC91047'},
+        {status:'In Transit',date:'2025-05-19T11:05:00',by:'RC91047'},
+      ]},
+    {id:'LD2025028',date:'2025-05-08',driverId:'MJ74821',tractor:'TRK001',trailer:'TRL001',origin:'Charlotte, NC',dest:'Boston, MA',miles:980,gross:3723.96,fsc:297.92,detention:300,otherCosts:0,actualPickupTime:'2025-05-19T10:45:00',actualDeliveryTime:'',actualFuelCost:0,status:'Loaded',broker:'XPO Logistics',poNum:'XPO-90112',bolNumber:'BOL-XPO-90112',commodity:'Electronics',weight:40200,pieces:22,sealNumber:'SL-XPO-90112',customerRef:'CUST-XPO-40221',scaleTicket:'ST-4821',deadheadMiles:45,pickupAppt:'2025-05-19T08:00',deliveryAppt:'2025-05-21T14:00',shipperName:'XPO Shippers Charlotte',shipperContact:'Dock Mgr · (704) 555-1200',consigneeName:'Boston Distribution Center',consigneeContact:'Receiving · (617) 555-8800',podStatus:'Pending',podUploadedDate:'',podUploadedBy:'',podNotes:'',pod:[],invoiced:false,invoiceDate:'',paid:false,paidDate:'',
+      statusHistory:[
+        {status:'Pending',date:'2025-05-08T09:00:00',by:'Dispatcher'},
+        {status:'Loaded',date:'2025-05-19T10:45:00',by:'MJ74821'},
+      ]},
+    {id:'LD2025029',date:'2025-05-10',driverId:'DW36190',tractor:'TRK002',trailer:'TRL002',origin:'Atlanta, GA',dest:'Miami, FL',miles:662,gross:2365.44,fsc:189.24,detention:0,otherCosts:0,status:'Pending',broker:'Echo Global',poNum:'ECH-45208',bolNumber:'',commodity:'Auto Parts',weight:38500,pieces:18,sealNumber:'',customerRef:'CUST-ECH-45208',scaleTicket:'',deadheadMiles:0,pickupAppt:'2025-05-22T09:00',deliveryAppt:'2025-05-24T17:00',shipperName:'Atlanta Auto Parts Dist.',shipperContact:'Dock Mgr · (404) 555-2200',consigneeName:'Miami Auto Warehouse',consigneeContact:'Receiving · (305) 555-3300',podStatus:'Pending',podUploadedDate:'',podUploadedBy:'',podNotes:'',pod:[],invoiced:false,invoiceDate:'',paid:false,paidDate:'',
+      statusHistory:[
+        {status:'Pending',date:'2025-05-10T07:45:00',by:'Dispatcher'},
+      ]},
+    {id:'LD2025030',date:'2025-05-12',driverId:'LB58234',tractor:'TRK003',trailer:'TRL003',origin:'Carnesville, GA',dest:'Richmond, VA',miles:625,gross:2319.38,fsc:185.55,detention:0,otherCosts:0,status:'Pending',broker:'Transplace',poNum:'TRP-88450',bolNumber:'',commodity:'General Freight',weight:41200,pieces:30,sealNumber:'',customerRef:'CUST-TRP-88450',scaleTicket:'',deadheadMiles:18,pickupAppt:'2025-05-23T08:00',deliveryAppt:'2025-05-25T15:00',shipperName:'Carnesville Transplace Shipper',shipperContact:'Loading Dock · (706) 555-5500',consigneeName:'Richmond Receiver LLC',consigneeContact:'Dock Mgr · (804) 555-7700',podStatus:'Pending',podUploadedDate:'',podUploadedBy:'',podNotes:'',pod:[],invoiced:false,invoiceDate:'',paid:false,paidDate:'',
+      statusHistory:[
+        {status:'Pending',date:'2025-05-12T08:30:00',by:'Dispatcher'},
+      ]},
+    {id:'LD2025031',date:'2025-05-06',driverId:'MJ74821',tractor:'TRK001',trailer:'TRL001',origin:'Atlanta, GA',dest:'Charlotte, NC',miles:245,gross:940.50,fsc:75.24,detention:0,otherCosts:0,status:'Delivered',broker:'CH Robinson',poNum:'CHR-31820',bolNumber:'BOL-CHR-31820',commodity:'Food Grade',weight:44000,pieces:48,podStatus:'Received',podUploadedDate:'2025-05-07',podUploadedBy:'MJ74821',podNotes:'',pod:[],invoiced:true,invoiceDate:'2025-05-08',paid:true,paidDate:'2025-05-16',
+      statusHistory:[
+        {status:'Pending',date:'2025-05-06T07:00:00',by:'Dispatcher'},
+        {status:'Loaded',date:'2025-05-06T09:15:00',by:'MJ74821'},
+        {status:'In Transit',date:'2025-05-06T10:00:00',by:'MJ74821'},
+        {status:'Delivered',date:'2025-05-07T13:30:00',by:'MJ74821'},
+      ]},
+    {id:'LD2025032',date:'2025-05-09',driverId:'MJ74821',tractor:'TRK001',trailer:'TRL001',origin:'Charlotte, NC',dest:'Philadelphia, PA',miles:482,gross:1839.74,fsc:147.18,detention:0,otherCosts:0,status:'Delivered',broker:'XPO Logistics',poNum:'XPO-90445',bolNumber:'BOL-XPO-90445',commodity:'Medical Supplies',weight:28000,pieces:60,podStatus:'Received',podUploadedDate:'2025-05-10',podUploadedBy:'MJ74821',podNotes:'Temp sensitive — maintained',pod:[],invoiced:true,invoiceDate:'2025-05-11',paid:true,paidDate:'2025-05-20',
+      statusHistory:[
+        {status:'Pending',date:'2025-05-09T06:00:00',by:'Dispatcher'},
+        {status:'Loaded',date:'2025-05-09T08:30:00',by:'MJ74821'},
+        {status:'In Transit',date:'2025-05-09T09:10:00',by:'MJ74821'},
+        {status:'Delivered',date:'2025-05-10T14:22:00',by:'MJ74821'},
+      ]},
+    {id:'LD2025033',date:'2025-05-19',driverId:'MJ74821',tractor:'TRK001',trailer:'TRL001',origin:'Philadelphia, PA',dest:'Atlanta, GA',miles:862,gross:2890.00,fsc:231.20,detention:0,otherCosts:0,status:'In Transit',broker:'Convoy',poNum:'CNV-12088',bolNumber:'BOL-CNV-12088',commodity:'Retail',weight:42500,pieces:36,podStatus:'Pending',podUploadedDate:'',podUploadedBy:'',podNotes:'',pod:[],invoiced:false,invoiceDate:'',paid:false,paidDate:'',
+      statusHistory:[
+        {status:'Pending',date:'2025-05-19T07:00:00',by:'Dispatcher'},
+        {status:'Loaded',date:'2025-05-19T09:00:00',by:'MJ74821'},
+        {status:'In Transit',date:'2025-05-19T09:45:00',by:'MJ74821'},
+      ]},
+    {id:'LD2025034',date:'2025-05-14',driverId:'DW36190',tractor:'TRK002',trailer:'TRL002',origin:'Chicago, IL',dest:'Memphis, TN',miles:536,gross:2044.00,fsc:163.52,detention:0,otherCosts:0,status:'Delivered',broker:'Echo Global',poNum:'ECH-45710',bolNumber:'BOL-ECH-45710',commodity:'Machinery',weight:39000,pieces:8,podStatus:'Received',podUploadedDate:'2025-05-15',podUploadedBy:'DW36190',podNotes:'',pod:[],invoiced:true,invoiceDate:'2025-05-16',paid:false,paidDate:'',
+      statusHistory:[
+        {status:'Pending',date:'2025-05-14T08:00:00',by:'Dispatcher'},
+        {status:'In Transit',date:'2025-05-14T11:00:00',by:'DW36190'},
+        {status:'Delivered',date:'2025-05-15T16:10:00',by:'DW36190'},
+      ]},
+    {id:'LD2025035',date:'2025-05-17',driverId:'DW36190',tractor:'TRK002',trailer:'TRL002',origin:'Memphis, TN',dest:'Atlanta, GA',miles:382,gross:1458.00,fsc:116.64,detention:150,otherCosts:0,status:'Delivered',broker:'Coyote Logistics',poNum:'COY-74890',bolNumber:'BOL-COY-74890',commodity:'General Freight',weight:37000,pieces:28,podStatus:'Received',podUploadedDate:'2025-05-18',podUploadedBy:'DW36190',podNotes:'',pod:[],invoiced:true,invoiceDate:'2025-05-19',paid:false,paidDate:'',
+      statusHistory:[
+        {status:'Pending',date:'2025-05-17T10:00:00',by:'Dispatcher'},
+        {status:'In Transit',date:'2025-05-17T14:00:00',by:'DW36190'},
+        {status:'Delivered',date:'2025-05-18T10:30:00',by:'DW36190'},
+      ]},
+    {id:'LD2025036',date:'2025-05-12',driverId:'LB58234',tractor:'TRK003',trailer:'TRL003',origin:'Atlanta, GA',dest:'Orlando, FL',miles:435,gross:2508.00,fsc:200.64,detention:0,otherCosts:0,status:'Delivered',broker:'Transplace',poNum:'TRP-88612',bolNumber:'BOL-TRP-88612',commodity:'Food Grade',weight:44000,pieces:52,podStatus:'Received',podUploadedDate:'2025-05-13',podUploadedBy:'LB58234',podNotes:'',pod:[],invoiced:true,invoiceDate:'2025-05-14',paid:true,paidDate:'2025-05-22',
+      statusHistory:[
+        {status:'Pending',date:'2025-05-12T07:00:00',by:'Dispatcher'},
+        {status:'In Transit',date:'2025-05-12T10:30:00',by:'LB58234'},
+        {status:'Delivered',date:'2025-05-13T08:45:00',by:'LB58234'},
+      ]},
+    {id:'LD2025037',date:'2025-05-15',driverId:'LB58234',tractor:'TRK003',trailer:'TRL003',origin:'Orlando, FL',dest:'Atlanta, GA',miles:440,gross:2600.00,fsc:208.00,detention:0,otherCosts:0,status:'Delivered',broker:'CH Robinson',poNum:'CHR-32110',bolNumber:'BOL-CHR-32110',commodity:'Electronics',weight:32000,pieces:40,podStatus:'Received',podUploadedDate:'2025-05-16',podUploadedBy:'LB58234',podNotes:'',pod:[],invoiced:true,invoiceDate:'2025-05-17',paid:false,paidDate:'',
+      statusHistory:[
+        {status:'Pending',date:'2025-05-15T08:00:00',by:'Dispatcher'},
+        {status:'In Transit',date:'2025-05-15T11:15:00',by:'LB58234'},
+        {status:'Delivered',date:'2025-05-16T09:20:00',by:'LB58234'},
+      ]},
+    {id:'LD2025038',date:'2025-05-14',driverId:'RC91047',tractor:'TRK004',trailer:'TRL004',origin:'Atlanta, GA',dest:'Detroit, MI',miles:751,gross:3620.00,fsc:289.60,detention:0,otherCosts:0,status:'Delivered',broker:'XPO Logistics',poNum:'XPO-90889',bolNumber:'BOL-XPO-90889',commodity:'Auto Parts',weight:43000,pieces:16,podStatus:'Received',podUploadedDate:'2025-05-16',podUploadedBy:'RC91047',podNotes:'',pod:[],invoiced:true,invoiceDate:'2025-05-17',paid:true,paidDate:'2025-05-24',
+      statusHistory:[
+        {status:'Pending',date:'2025-05-14T09:00:00',by:'Dispatcher'},
+        {status:'Loaded',date:'2025-05-14T12:00:00',by:'RC91047'},
+        {status:'In Transit',date:'2025-05-14T12:45:00',by:'RC91047'},
+        {status:'Delivered',date:'2025-05-15T18:30:00',by:'RC91047'},
+      ]},
+    {id:'LD2025039',date:'2025-05-19',driverId:'RC91047',tractor:'TRK004',trailer:'TRL004',origin:'Detroit, MI',dest:'Charlotte, NC',miles:640,gross:2880.00,fsc:230.40,detention:0,otherCosts:0,status:'In Transit',broker:'Echo Global',poNum:'ECH-46001',bolNumber:'BOL-ECH-46001',commodity:'Retail',weight:40000,pieces:32,podStatus:'Pending',podUploadedDate:'',podUploadedBy:'',podNotes:'',pod:[],invoiced:false,invoiceDate:'',paid:false,paidDate:'',
+      statusHistory:[
+        {status:'Pending',date:'2025-05-19T07:00:00',by:'Dispatcher'},
+        {status:'In Transit',date:'2025-05-19T10:00:00',by:'RC91047'},
+      ]},
+    {id:'LD2025040',date:'2025-05-21',driverId:'RC91047',tractor:'TRK004',trailer:'TRL004',origin:'Charlotte, NC',dest:'Atlanta, GA',miles:245,gross:940.00,fsc:75.20,detention:150,otherCosts:0,status:'Pending',broker:'Convoy',poNum:'CNV-12200',bolNumber:'',commodity:'General Freight',weight:38000,pieces:24,podStatus:'Pending',podUploadedDate:'',podUploadedBy:'',podNotes:'',pod:[],invoiced:false,invoiceDate:'',paid:false,paidDate:'',
+      statusHistory:[
+        {status:'Pending',date:'2025-05-21T08:00:00',by:'Dispatcher'},
+      ]},
+  ,
+    // ── 2026 LOADS (fresh data for all module testing) ──────
+    {id:'LD2026001',date:'2026-01-05',driverId:'MJ74821',tractor:'TRK001',trailer:'TRL001',origin:'Atlanta, GA',dest:'Charlotte, NC',miles:245,gross:1102.50,fsc:88.20,detention:0,otherCosts:0,status:'Delivered',broker:'CH Robinson',poNum:'CHR-44231',invoiced:true,invoiceDate:'2026-01-06',paid:true,paidDate:'2026-01-20',bolNumber:'BOL-2026001',commodity:'Retail Goods',weight:38000,pieces:24,podStatus:'Received',podUploadedDate:'2026-01-06',actualPickupTime:'2026-01-05T07:30:00Z',actualDeliveryTime:'2026-01-05T14:15:00Z'},
+    {id:'LD2026002',date:'2026-01-08',driverId:'DW36190',tractor:'TRK002',trailer:'TRL002',origin:'Charlotte, NC',dest:'Baltimore, MD',miles:390,gross:1755.00,fsc:140.40,detention:150,otherCosts:0,status:'Delivered',broker:'XPO Logistics',poNum:'XPO-77443',invoiced:true,invoiceDate:'2026-01-09',paid:true,paidDate:'2026-01-24',bolNumber:'BOL-2026002',commodity:'Auto Parts',weight:42000,pieces:18,podStatus:'Received',podUploadedDate:'2026-01-09',actualDeliveryTime:'2026-01-09T09:30:00Z'},
+    {id:'LD2026003',date:'2026-01-12',driverId:'LB58234',tractor:'TRK003',trailer:'TRL003',origin:'Atlanta, GA',dest:'Boston, MA',miles:1099,gross:4945.50,fsc:395.64,detention:0,otherCosts:0,status:'Delivered',broker:'Coyote Logistics',poNum:'COY-33219',invoiced:true,invoiceDate:'2026-01-13',paid:true,paidDate:'2026-02-01',bolNumber:'BOL-2026003',commodity:'Frozen Food',weight:40000,pieces:32,podStatus:'Received',podUploadedDate:'2026-01-14',actualDeliveryTime:'2026-01-14T11:00:00Z'},
+    {id:'LD2026004',date:'2026-01-15',driverId:'RC91047',tractor:'TRK004',trailer:'TRL004',origin:'Miami, FL',dest:'Atlanta, GA',miles:662,gross:2979.00,fsc:238.32,detention:0,otherCosts:0,status:'Delivered',broker:'Echo Global',poNum:'ECH-55012',invoiced:true,invoiceDate:'2026-01-16',paid:true,paidDate:'2026-02-01',bolNumber:'BOL-2026004',commodity:'Consumer Electronics',weight:35000,pieces:48,podStatus:'Received',podUploadedDate:'2026-01-17',actualDeliveryTime:'2026-01-16T16:00:00Z'},
+    {id:'LD2026005',date:'2026-01-19',driverId:'TS62803',tractor:'TRK005',trailer:'TRL005',origin:'Nashville, TN',dest:'Dallas, TX',miles:560,gross:2520.00,fsc:201.60,detention:0,otherCosts:0,status:'Delivered',broker:'CH Robinson',poNum:'CHR-44892',invoiced:true,invoiceDate:'2026-01-20',paid:true,paidDate:'2026-02-05',bolNumber:'BOL-2026005',commodity:'Industrial Equipment',weight:45000,pieces:6,podStatus:'Received',podUploadedDate:'2026-01-21',actualDeliveryTime:'2026-01-20T15:30:00Z'},
+    {id:'LD2026006',date:'2026-02-03',driverId:'MJ74821',tractor:'TRK001',trailer:'TRL001',origin:'Atlanta, GA',dest:'New York, NY',miles:870,gross:3915.00,fsc:313.20,detention:200,otherCosts:0,status:'Delivered',broker:'XPO Logistics',poNum:'XPO-88112',invoiced:true,invoiceDate:'2026-02-04',paid:true,paidDate:'2026-02-20',bolNumber:'BOL-2026006',commodity:'Apparel',weight:28000,pieces:96,podStatus:'Received',podUploadedDate:'2026-02-05',actualDeliveryTime:'2026-02-04T13:00:00Z'},
+    {id:'LD2026007',date:'2026-02-07',driverId:'DW36190',tractor:'TRK002',trailer:'TRL002',origin:'Charlotte, NC',dest:'Chicago, IL',miles:742,gross:3339.00,fsc:267.12,detention:0,otherCosts:0,status:'Delivered',broker:'Coyote Logistics',poNum:'COY-44218',invoiced:true,invoiceDate:'2026-02-08',paid:true,paidDate:'2026-02-22',bolNumber:'BOL-2026007',commodity:'Paper Products',weight:41000,pieces:22,podStatus:'Received',podUploadedDate:'2026-02-09',actualDeliveryTime:'2026-02-09T10:00:00Z'},
+    {id:'LD2026008',date:'2026-02-11',driverId:'LB58234',tractor:'TRK003',trailer:'TRL003',origin:'Chicago, IL',dest:'Miami, FL',miles:1378,gross:6201.00,fsc:496.08,detention:300,otherCosts:0,status:'Delivered',broker:'CH Robinson',poNum:'CHR-55774',invoiced:true,invoiceDate:'2026-02-12',paid:true,paidDate:'2026-03-01',bolNumber:'BOL-2026008',commodity:'Produce',weight:38500,pieces:14,podStatus:'Received',podUploadedDate:'2026-02-13',actualDeliveryTime:'2026-02-13T08:00:00Z'},
+    {id:'LD2026009',date:'2026-02-17',driverId:'RC91047',tractor:'TRK004',trailer:'TRL004',origin:'Atlanta, GA',dest:'Philadelphia, PA',miles:790,gross:3555.00,fsc:284.40,detention:0,otherCosts:0,status:'Delivered',broker:'Echo Global',poNum:'ECH-66331',invoiced:true,invoiceDate:'2026-02-18',paid:true,paidDate:'2026-03-05',bolNumber:'BOL-2026009',commodity:'Automotive',weight:40000,pieces:8,podStatus:'Received',podUploadedDate:'2026-02-19',actualDeliveryTime:'2026-02-18T14:00:00Z'},
+    {id:'LD2026010',date:'2026-02-22',driverId:'TS62803',tractor:'TRK005',trailer:'TRL005',origin:'Dallas, TX',dest:'Atlanta, GA',miles:781,gross:3514.50,fsc:281.16,detention:0,otherCosts:0,status:'Delivered',broker:'XPO Logistics',poNum:'XPO-99221',invoiced:true,invoiceDate:'2026-02-23',paid:true,paidDate:'2026-03-08',bolNumber:'BOL-2026010',commodity:'Retail Goods',weight:36000,pieces:60,podStatus:'Received',podUploadedDate:'2026-02-24',actualDeliveryTime:'2026-02-23T12:00:00Z'},
+    {id:'LD2026011',date:'2026-03-03',driverId:'MJ74821',tractor:'TRK001',trailer:'TRL001',origin:'Charlotte, NC',dest:'Boston, MA',miles:980,gross:4410.00,fsc:352.80,detention:100,otherCosts:0,status:'Delivered',broker:'Coyote Logistics',poNum:'COY-55891',invoiced:true,invoiceDate:'2026-03-04',paid:true,paidDate:'2026-03-18',bolNumber:'BOL-2026011',commodity:'Electronics',weight:32000,pieces:44,podStatus:'Received',podUploadedDate:'2026-03-05',actualDeliveryTime:'2026-03-05T09:00:00Z'},
+    {id:'LD2026012',date:'2026-03-08',driverId:'DW36190',tractor:'TRK002',trailer:'TRL002',origin:'Miami, FL',dest:'Chicago, IL',miles:1378,gross:6201.00,fsc:496.08,detention:0,otherCosts:0,status:'Delivered',broker:'CH Robinson',poNum:'CHR-66112',invoiced:true,invoiceDate:'2026-03-09',paid:true,paidDate:'2026-03-24',bolNumber:'BOL-2026012',commodity:'Household Goods',weight:39000,pieces:30,podStatus:'Received',podUploadedDate:'2026-03-10',actualDeliveryTime:'2026-03-10T11:00:00Z'},
+    {id:'LD2026013',date:'2026-03-15',driverId:'LB58234',tractor:'TRK003',trailer:'TRL003',origin:'Atlanta, GA',dest:'Nashville, TN',miles:249,gross:1120.50,fsc:89.64,detention:0,otherCosts:0,status:'Delivered',broker:'Echo Global',poNum:'ECH-77443',invoiced:true,invoiceDate:'2026-03-16',paid:true,paidDate:'2026-03-30',bolNumber:'BOL-2026013',commodity:'Food & Beverage',weight:41500,pieces:28,podStatus:'Received',podUploadedDate:'2026-03-16',actualDeliveryTime:'2026-03-15T13:00:00Z'},
+    {id:'LD2026014',date:'2026-03-20',driverId:'RC91047',tractor:'TRK004',trailer:'TRL004',origin:'Charlotte, NC',dest:'Chicago, IL',miles:742,gross:3339.00,fsc:267.12,detention:150,otherCosts:0,status:'Delivered',broker:'XPO Logistics',poNum:'XPO-11334',invoiced:true,invoiceDate:'2026-03-21',paid:false,bolNumber:'BOL-2026014',commodity:'Machine Parts',weight:44000,pieces:12,podStatus:'Received',podUploadedDate:'2026-03-22',actualDeliveryTime:'2026-03-21T15:00:00Z'},
+    {id:'LD2026015',date:'2026-03-25',driverId:'TS62803',tractor:'TRK005',trailer:'TRL005',origin:'Atlanta, GA',dest:'Baltimore, MD',miles:660,gross:2970.00,fsc:237.60,detention:0,otherCosts:0,status:'Delivered',broker:'Coyote Logistics',poNum:'COY-66778',invoiced:true,invoiceDate:'2026-03-26',paid:false,bolNumber:'BOL-2026015',commodity:'Retail',weight:37000,pieces:50,podStatus:'Received',podUploadedDate:'2026-03-27',actualDeliveryTime:'2026-03-26T10:00:00Z'},
+    {id:'LD2026016',date:'2026-04-02',driverId:'MJ74821',tractor:'TRK001',trailer:'TRL001',origin:'Boston, MA',dest:'Atlanta, GA',miles:1099,gross:4945.50,fsc:395.64,detention:0,otherCosts:0,status:'Delivered',broker:'CH Robinson',poNum:'CHR-77221',invoiced:true,invoiceDate:'2026-04-03',paid:false,bolNumber:'BOL-2026016',commodity:'Apparel',weight:30000,pieces:84,podStatus:'Received',podUploadedDate:'2026-04-04',actualDeliveryTime:'2026-04-04T14:00:00Z'},
+    {id:'LD2026017',date:'2026-04-07',driverId:'DW36190',tractor:'TRK002',trailer:'TRL002',origin:'Chicago, IL',dest:'Dallas, TX',miles:917,gross:4126.50,fsc:330.12,detention:200,otherCosts:0,status:'Delivered',broker:'Echo Global',poNum:'ECH-88552',invoiced:true,invoiceDate:'2026-04-08',paid:false,bolNumber:'BOL-2026017',commodity:'Electronics',weight:35000,pieces:20,podStatus:'Received',podUploadedDate:'2026-04-09',actualDeliveryTime:'2026-04-09T08:00:00Z'},
+    {id:'LD2026018',date:'2026-04-14',driverId:'LB58234',tractor:'TRK003',trailer:'TRL003',origin:'Miami, FL',dest:'Boston, MA',miles:1494,gross:6723.00,fsc:537.84,detention:0,otherCosts:0,status:'Delivered',broker:'XPO Logistics',poNum:'XPO-22441',invoiced:false,bolNumber:'BOL-2026018',commodity:'Produce',weight:39000,pieces:16,podStatus:'Received',podUploadedDate:'2026-04-17',actualDeliveryTime:'2026-04-17T12:00:00Z'},
+    {id:'LD2026019',date:'2026-04-20',driverId:'RC91047',tractor:'TRK004',trailer:'TRL004',origin:'Atlanta, GA',dest:'New York, NY',miles:870,gross:3915.00,fsc:313.20,detention:100,otherCosts:0,status:'Delivered',broker:'Coyote Logistics',poNum:'COY-77891',invoiced:false,bolNumber:'BOL-2026019',commodity:'Consumer Goods',weight:36500,pieces:72,podStatus:'Pending',actualDeliveryTime:'2026-04-21T16:00:00Z'},
+    {id:'LD2026020',date:'2026-04-25',driverId:'TS62803',tractor:'TRK005',trailer:'TRL005',origin:'Dallas, TX',dest:'Nashville, TN',miles:560,gross:2520.00,fsc:201.60,detention:0,otherCosts:0,status:'Delivered',broker:'CH Robinson',poNum:'CHR-88334',invoiced:false,bolNumber:'BOL-2026020',commodity:'Industrial',weight:42000,pieces:8,podStatus:'Pending',actualDeliveryTime:'2026-04-26T10:00:00Z'},
+    {id:'LD2026021',date:'2026-05-05',driverId:'MJ74821',tractor:'TRK001',trailer:'TRL001',origin:'Atlanta, GA',dest:'Chicago, IL',miles:716,gross:3222.00,fsc:257.76,detention:0,otherCosts:0,status:'Delivered',broker:'Echo Global',poNum:'ECH-99661',invoiced:false,bolNumber:'BOL-2026021',commodity:'Retail Goods',weight:38000,pieces:40,podStatus:'Pending',actualDeliveryTime:'2026-05-07T09:00:00Z'},
+    {id:'LD2026022',date:'2026-05-12',driverId:'DW36190',tractor:'TRK002',trailer:'TRL002',origin:'Charlotte, NC',dest:'Miami, FL',miles:663,gross:2983.50,fsc:238.68,detention:150,otherCosts:0,status:'Delivered',broker:'XPO Logistics',poNum:'XPO-33556',invoiced:false,bolNumber:'BOL-2026022',commodity:'Auto Parts',weight:43000,pieces:14,podStatus:'Pending',actualDeliveryTime:'2026-05-14T11:00:00Z'},
+    {id:'LD2026023',date:'2026-05-19',driverId:'LB58234',tractor:'TRK003',trailer:'TRL003',origin:'Chicago, IL',dest:'Atlanta, GA',miles:716,gross:3222.00,fsc:257.76,detention:0,otherCosts:0,status:'Delivered',broker:'Coyote Logistics',poNum:'COY-88114',invoiced:false,bolNumber:'BOL-2026023',commodity:'Paper Products',weight:40000,pieces:22,podStatus:'Missing',actualDeliveryTime:'2026-05-21T13:00:00Z'},
+    {id:'LD2026024',date:'2026-06-03',driverId:'RC91047',tractor:'TRK004',trailer:'TRL004',origin:'Baltimore, MD',dest:'Atlanta, GA',miles:680,gross:3060.00,fsc:244.80,detention:0,otherCosts:0,status:'Delivered',broker:'CH Robinson',poNum:'CHR-99447',invoiced:false,bolNumber:'BOL-2026024',commodity:'Household Goods',weight:37500,pieces:30,podStatus:'Missing',actualDeliveryTime:'2026-06-05T08:00:00Z'},
+    {id:'LD2026025',date:'2026-06-10',driverId:'TS62803',tractor:'TRK005',trailer:'TRL005',origin:'Nashville, TN',dest:'Baltimore, MD',miles:715,gross:3217.50,fsc:257.40,detention:200,otherCosts:0,status:'Delivered',broker:'Echo Global',poNum:'ECH-11228',invoiced:false,bolNumber:'BOL-2026025',commodity:'Electronics',weight:34000,pieces:60,podStatus:'Missing',actualDeliveryTime:'2026-06-12T14:00:00Z'},
+    {id:'LD2026026',date:'2026-07-01',driverId:'MJ74821',tractor:'TRK001',trailer:'TRL001',origin:'Atlanta, GA',dest:'Boston, MA',miles:1099,gross:4945.50,fsc:395.64,detention:0,otherCosts:0,status:'In Transit',broker:'CH Robinson',poNum:'CHR-00119',bolNumber:'BOL-2026026',commodity:'Retail',weight:39000,pieces:48},
+    {id:'LD2026027',date:'2026-07-05',driverId:'DW36190',tractor:'TRK002',trailer:'TRL002',origin:'Chicago, IL',dest:'Charlotte, NC',miles:742,gross:3339.00,fsc:267.12,detention:0,otherCosts:0,status:'In Transit',broker:'XPO Logistics',poNum:'XPO-44669',bolNumber:'BOL-2026027',commodity:'Auto Parts',weight:41000,pieces:18},
+    {id:'LD2026028',date:'2026-07-10',driverId:'LB58234',tractor:'TRK003',trailer:'TRL003',origin:'Miami, FL',dest:'New York, NY',miles:1280,gross:5760.00,fsc:460.80,detention:300,otherCosts:0,status:'Loaded',broker:'Coyote Logistics',poNum:'COY-99337',bolNumber:'BOL-2026028',commodity:'Produce',weight:38000,pieces:20},
+    {id:'LD2026029',date:'2026-07-15',driverId:'RC91047',tractor:'TRK004',trailer:'TRL004',origin:'Atlanta, GA',dest:'Dallas, TX',miles:781,gross:3514.50,fsc:281.16,detention:0,otherCosts:0,status:'Loaded',broker:'Echo Global',poNum:'ECH-22339',bolNumber:'BOL-2026029',commodity:'Industrial Goods',weight:44000,pieces:10},
+    {id:'LD2026030',date:'2026-07-20',driverId:'TS62803',tractor:'TRK005',trailer:'TRL005',origin:'Nashville, TN',dest:'Chicago, IL',miles:476,gross:2142.00,fsc:171.36,detention:0,otherCosts:0,status:'Loaded',broker:'CH Robinson',poNum:'CHR-11228',commodity:'Consumer Goods',weight:36000,pieces:54},
+    {id:'LD2026031',date:'2026-07-25',driverId:'MJ74821',tractor:'TRK001',trailer:'TRL001',origin:'Boston, MA',dest:'Atlanta, GA',miles:1099,gross:4945.50,fsc:395.64,detention:0,otherCosts:0,status:'In Transit',broker:'XPO Logistics',poNum:'XPO-55778',commodity:'Retail Goods',weight:38500,pieces:44},
+    {id:'LD2026032',date:'2026-08-01',driverId:'DW36190',tractor:'TRK002',trailer:'TRL002',origin:'Charlotte, NC',dest:'Miami, FL',miles:663,gross:2983.50,fsc:238.68,detention:150,otherCosts:0,status:'Loaded',broker:'Coyote Logistics',poNum:'COY-00112',commodity:'Electronics',weight:33000,pieces:72},
+    {id:'LD2026033',date:'2026-08-05',driverId:'',tractor:'',trailer:'',origin:'Chicago, IL',dest:'Dallas, TX',miles:917,gross:4126.50,fsc:330.12,detention:0,otherCosts:0,status:'Pending',broker:'Echo Global',poNum:'ECH-33441',commodity:'Industrial',weight:42000,pieces:16},
+    {id:'LD2026034',date:'2026-08-07',driverId:'',tractor:'',trailer:'',origin:'Baltimore, MD',dest:'Nashville, TN',miles:764,gross:3438.00,fsc:275.04,detention:0,otherCosts:0,status:'Pending',broker:'CH Robinson',poNum:'CHR-22337',commodity:'Auto Parts',weight:40000,pieces:24},
+    {id:'LD2026035',date:'2026-08-07',driverId:'',tractor:'',trailer:'',origin:'Dallas, TX',dest:'Atlanta, GA',miles:781,gross:3514.50,fsc:281.16,detention:0,otherCosts:0,status:'Pending',broker:'XPO Logistics',poNum:'XPO-66889',commodity:'Consumer Goods',weight:37000,pieces:60}
+  ];
+const EMBEDDED_SETTS   = [
+    {id:'SET-2025-W18-MJ74821',driverId:'MJ74821',weekEnding:'2025-05-04',status:'Paid',paidDate:'2025-05-06',
+      loads:['LD2025026','LD2025027'],grossRevenue:5822.50,driverGross:1630.30,
+      deductions:[
+        {label:'Fuel Advance (ADV001)',amount:300,type:'advance'},
+        {label:'Escrow Hold',amount:50,type:'escrow'},
+        {label:'EFS Fuel Card — week charges',amount:45.20,type:'fuelcard'},
+      ],
+      reimbursements:[
+        {label:'Lumper — Charlotte DC',amount:75,type:'lumper'},
+      ],
+      netPay:1310.10,checkNumber:'1042',notes:''},
+    {id:'SET-2025-W19-MJ74821',driverId:'MJ74821',weekEnding:'2025-05-11',status:'Paid',paidDate:'2025-05-13',
+      loads:['LD2025028'],grossRevenue:3180.00,driverGross:890.40,
+      deductions:[
+        {label:'Escrow Hold',amount:50,type:'escrow'},
+        {label:'EFS Fuel Card',amount:28.75,type:'fuelcard'},
+      ],
+      reimbursements:[],
+      netPay:811.65,checkNumber:'1058',notes:''},
+    {id:'SET-2025-W20-DW36190',driverId:'DW36190',weekEnding:'2025-05-11',status:'Pending',paidDate:'',
+      loads:['LD2025029'],grossRevenue:2844.00,driverGross:796.32,
+      deductions:[
+        {label:'Escrow Hold',amount:50,type:'escrow'},
+        {label:'Scale Ticket',amount:12.50,type:'misc'},
+      ],
+      reimbursements:[],
+      netPay:733.82,checkNumber:'',notes:'Pending owner review'},
+    {id:'SET-2025-W20-RC91047',driverId:'RC91047',weekEnding:'2025-05-11',status:'Pending',paidDate:'',
+      loads:['LD2025027'],grossRevenue:3087.16,driverGross:864.40,
+      deductions:[
+        {label:'Advance Recovery (ADV004) — partial',amount:100,type:'advance'},
+      ],
+      reimbursements:[
+        {label:'Detention — Dallas shipper',amount:150,type:'detention'},
+      ],
+      netPay:914.40,checkNumber:'',notes:''},
+  ,
+    // ── 2026 Settlements ─────────────────────────
+    {id:'SET2026001',driverId:'MJ74821',weekEnding:'2026-01-09',status:'Paid',grossPay:1612.22,deductions:[{desc:'Escrow Hold',amt:50}],netPay:1562.22,loads:['LD2026001'],checkNum:'CHK-2026-001',paidDate:'2026-01-09',notes:''},
+    {id:'SET2026002',driverId:'DW36190',weekEnding:'2026-01-09',status:'Paid',grossPay:1381.80,deductions:[{desc:'Escrow Hold',amt:50},{desc:'Advance Repayment',amt:100}],netPay:1231.80,loads:['LD2026002'],checkNum:'CHK-2026-002',paidDate:'2026-01-09',notes:''},
+    {id:'SET2026003',driverId:'LB58234',weekEnding:'2026-01-16',status:'Paid',grossPay:2999.99,deductions:[{desc:'Escrow Hold',amt:50}],netPay:2949.99,loads:['LD2026003'],checkNum:'CHK-2026-003',paidDate:'2026-01-16',notes:'Long haul bonus'},
+    {id:'SET2026004',driverId:'RC91047',weekEnding:'2026-01-16',status:'Paid',grossPay:2023.79,deductions:[{desc:'Escrow Hold',amt:50}],netPay:1973.79,loads:['LD2026004'],checkNum:'CHK-2026-004',paidDate:'2026-01-16',notes:''},
+    {id:'SET2026005',driverId:'MJ74821',weekEnding:'2026-07-04',status:'Paid',grossPay:4059.39,deductions:[{desc:'Escrow Hold',amt:50}],netPay:4009.39,loads:['LD2026016','LD2026006'],checkNum:'CHK-2026-105',paidDate:'2026-07-03',notes:''},
+    {id:'SET2026006',driverId:'DW36190',weekEnding:'2026-07-11',status:'Pending',grossPay:3063.10,deductions:[{desc:'Escrow Hold',amt:50}],netPay:3013.10,loads:['LD2026027'],checkNum:'',paidDate:'',notes:'Pending — load in transit'},
+    {id:'SET2026007',driverId:'LB58234',weekEnding:'2026-07-11',status:'Pending',grossPay:4012.44,deductions:[{desc:'Escrow Hold',amt:50}],netPay:3962.44,loads:['LD2026028'],checkNum:'',paidDate:'',notes:'Pending — reefer load in transit'}
+  ];
+const EMBEDDED_DVIR    = [
+    {id:'DVIR001',date:'2025-05-16',driverId:'MJ74821',unit:'TRK001',type:'Pre-Trip',odometer:412480,result:'Pass',defects:[],signedOff:true,notes:''},
+    {id:'DVIR002',date:'2025-05-16',driverId:'LB58234',unit:'TRK003',type:'Pre-Trip',odometer:197950,result:'Defect',defects:['Left mirror cracked','Passenger wiper streaking'],signedOff:true,notes:'Minor defects — not out of service'},
+    {id:'DVIR003',date:'2025-05-15',driverId:'RC91047',unit:'TRK004',type:'Post-Trip',odometer:686800,result:'Pass',defects:[],signedOff:true,notes:''},
+    {id:'DVIR004',date:'2025-05-14',driverId:'DW36190',unit:'TRK002',type:'Pre-Trip',odometer:520800,result:'Pass',defects:[],signedOff:true,notes:''},
+    {id:'DVIR005',date:'2025-05-13',driverId:'MJ74821',unit:'TRK001',type:'Post-Trip',odometer:412200,result:'Pass',defects:[],signedOff:true,notes:''},
+  ,
+    // ── 2026 DVIR Records ──────────────────────
+    {id:'DVIR2026001',date:'2026-07-28',driverId:'MJ74821',unit:'TRK001',type:'Pre-trip',odometer:440850,result:'Satisfactory',defects:[],signedOff:true,notes:'All systems normal'},
+    {id:'DVIR2026002',date:'2026-07-28',driverId:'DW36190',unit:'TRK002',type:'Pre-trip',odometer:411720,result:'Defects Found',defects:['Left mirror loose','Low windshield washer fluid'],signedOff:true,notes:'Mirror tightened in yard'},
+    {id:'DVIR2026003',date:'2026-07-29',driverId:'LB58234',unit:'TRK003',type:'Pre-trip',odometer:315100,result:'Satisfactory',defects:[],signedOff:true,notes:''},
+    {id:'DVIR2026004',date:'2026-07-29',driverId:'RC91047',unit:'TRK004',type:'Pre-trip',odometer:525440,result:'Defects Found',defects:['Right front tire tread low — 4/32','ABS light on'],signedOff:false,notes:'Sent to shop for tire and ABS inspection'},
+    {id:'DVIR2026005',date:'2026-07-30',driverId:'TS62803',unit:'TRK005',type:'Pre-trip',odometer:178220,result:'Satisfactory',defects:[],signedOff:true,notes:'New driver — excellent inspection'},
+    {id:'DVIR2026006',date:'2026-08-01',driverId:'MJ74821',unit:'TRK001',type:'Pre-trip',odometer:441100,result:'Satisfactory',defects:[],signedOff:true,notes:''},
+    {id:'DVIR2026007',date:'2026-08-01',driverId:'DW36190',unit:'TRK002',type:'Post-trip',odometer:411980,result:'Satisfactory',defects:[],signedOff:true,notes:'Load delivered on time'}
+  ];
+const EMBEDDED_HOS     = [
+    {driverId:'MJ74821',log_date:'2025-05-16',driving_hours:8.5,on_duty_hours:2.0,sleeper_hours:8.0,off_duty_hours:5.5,cycle_used:52,cycle_limit:70,status:'Driving'},
+    {driverId:'DW36190',log_date:'2025-05-16',driving_hours:0,on_duty_hours:1.0,sleeper_hours:0,off_duty_hours:23.0,cycle_used:28,cycle_limit:70,status:'Off Duty'},
+    {driverId:'LB58234',log_date:'2025-05-16',driving_hours:6.0,on_duty_hours:3.5,sleeper_hours:8.0,off_duty_hours:6.5,cycle_used:44,cycle_limit:70,status:'On Duty'},
+    {driverId:'RC91047',log_date:'2025-05-16',driving_hours:9.5,on_duty_hours:1.5,sleeper_hours:8.0,off_duty_hours:5.0,cycle_used:61,cycle_limit:70,status:'Driving'},
+    {driverId:'TS62803',log_date:'2025-05-16',driving_hours:0,on_duty_hours:0,sleeper_hours:0,off_duty_hours:24.0,cycle_used:0,cycle_limit:70,status:'Off Duty'},
+  ,
+    // ── Current week HOS ──────────────────────
+    {id:'HOS2026-MJ-0801',driverId:'MJ74821',date:'2026-08-01',drivingHours:9.5,onDutyHours:1.5,sleeperHours:8.0,offDutyHours:5.0,cycleUsed:58.5,cycleAvail:11.5,status:'Sleeper Berth',loadId:'LD2026026'},
+    {id:'HOS2026-DW-0801',driverId:'DW36190',date:'2026-08-01',drivingHours:8.0,onDutyHours:2.0,sleeperHours:8.0,offDutyHours:6.0,cycleUsed:42.0,cycleAvail:28.0,status:'Off Duty',loadId:'LD2026027'},
+    {id:'HOS2026-LB-0801',driverId:'LB58234',date:'2026-08-01',drivingHours:10.5,onDutyHours:1.0,sleeperHours:8.0,offDutyHours:4.5,cycleUsed:65.5,cycleAvail:4.5,status:'Driving',loadId:'LD2026028'},
+    {id:'HOS2026-RC-0801',driverId:'RC91047',date:'2026-08-01',drivingHours:7.5,onDutyHours:2.5,sleeperHours:0,offDutyHours:14.0,cycleUsed:38.0,cycleAvail:32.0,status:'Off Duty',loadId:'LD2026029'},
+    {id:'HOS2026-TS-0801',driverId:'TS62803',date:'2026-08-01',drivingHours:0,onDutyHours:0,sleeperHours:0,offDutyHours:24.0,cycleUsed:22.0,cycleAvail:48.0,status:'Off Duty',loadId:null}
+  ];
+
+
+
+// ─── DRIVER APP CORE ─────────────────────────────────────────
+// Inlined from full TMS — driver-specific data only
+
+// Pull DB from localStorage (shared with office app if on same device)
+let DB = {drivers:[],loads:[],tractors:[],fuel:[],dvirRecords:[],hos:[],settlements:[],driverChecklist:{}};
+let dApp = { driverId: null, screen: 'home', dvirChecks: {} };
+
+// Load data from localStorage
+function loadData(){
+  // ── Step 1: Try to read live office DB (same browser, same device) ──
+  let usedOfficeDB = false;
+  try {
+    const officeRaw = localStorage.getItem('parchies_tms_db');
+    if(officeRaw){
+      const officeDB = JSON.parse(officeRaw);
+      // Load all relevant collections from office DB
+      if(officeDB.drivers     && officeDB.drivers.length)     DB.drivers     = officeDB.drivers;
+      if(officeDB.loads       && officeDB.loads.length)       DB.loads       = officeDB.loads;
+      if(officeDB.settlements && officeDB.settlements.length) DB.settlements = officeDB.settlements;
+      if(officeDB.dvirRecords && officeDB.dvirRecords.length) DB.dvirRecords = officeDB.dvirRecords;
+      if(officeDB.hos         && officeDB.hos.length)         DB.hos         = officeDB.hos;
+      if(officeDB.tractors)    DB.tractors    = officeDB.tractors;
+      if(officeDB.fuel)        DB.fuel        = officeDB.fuel;
+      if(officeDB.schedule)    DB.schedule    = officeDB.schedule;
+      DB.driverChecklist = officeDB.driverChecklist || {};
+      usedOfficeDB = true;
+    }
+  } catch(e){ }
+
+  // ── Step 2: Fall back to embedded data if office DB not available ──
+  if(!usedOfficeDB){
+    DB.drivers     = EMBEDDED_DRIVERS.map(d=>({...d}));
+    DB.loads       = EMBEDDED_LOADS.map(l=>({...l}));
+    DB.settlements = EMBEDDED_SETTS.map(s=>({...s}));
+    DB.dvirRecords = EMBEDDED_DVIR.map(r=>({...r}));
+    DB.hos         = EMBEDDED_HOS.map(h=>({...h}));
+    DB.driverChecklist = {};
+  }
+
+  // ── Step 3: Apply driver-side deltas (actions taken in driver app) ──
+  try {
+    const saved = localStorage.getItem('parchies-driver-db');
+    if(saved){
+      const delta = JSON.parse(saved);
+      // Merge load status changes (deliveries, POD updates)
+      if(delta.loads) delta.loads.forEach(dl=>{
+        const existing = DB.loads.find(l=>l.id===dl.id);
+        if(existing) Object.assign(existing, dl);
+        else DB.loads.push(dl);
+      });
+      // Merge driver status changes (Available/In Transit/etc)
+      if(delta.drivers) delta.drivers.forEach(dd=>{
+        const existing = DB.drivers.find(d=>d.id===dd.id);
+        if(existing) Object.assign(existing, dd);
+      });
+      // Merge new DVIR records submitted by driver
+      if(delta.newDvir) delta.newDvir.forEach(r=>{
+        if(!DB.dvirRecords.find(x=>x.id===r.id)) DB.dvirRecords.unshift(r);
+      });
+      if(delta.driverChecklist) DB.driverChecklist = delta.driverChecklist;
+      if(delta.photos)          dApp.photos        = delta.photos;
+      if(delta.signatures)      dApp.signatures    = delta.signatures;
+      if(delta.checkCalls)      dApp.checkCalls    = delta.checkCalls;
+      if(delta.photoTag)        dApp.photoTag      = delta.photoTag;
+      if(delta.dvirMedia)       dApp.dvirMedia     = delta.dvirMedia;
+      if(delta.dvirNotes)       dApp.dvirNotes     = delta.dvirNotes;
+      if(delta.dvirType)        dApp.dvirType      = delta.dvirType;
+      if(delta.chatMessages)    dApp.chatMessages  = delta.chatMessages;
+      if(delta.toolTab)         dApp.toolTab       = delta.toolTab;
+      if(delta.fuelSearchCity)  dApp.fuelSearchCity= delta.fuelSearchCity;
+    }
+  } catch(e){ }
+
+  // ── Populate driver select on login screen ──
+  const sel = document.getElementById('d-driver-select');
+  if(sel){
+    while(sel.options.length > 1) sel.remove(1);
+    DB.drivers.forEach(d=>{
+      const opt = document.createElement('option');
+      opt.value = d.id; opt.textContent = d.name;
+      sel.appendChild(opt);
+    });
+  }
+}
+
+// Toast notification
+function toast(msg, dur=2500){
+  const el=document.getElementById('d-toast');
+  el.textContent=msg; el.classList.add('show');
+  clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('show'),dur);
+}
+
+// Login
+function driverLogin(){
+  const id=document.getElementById('d-driver-select').value;
+  const pin=document.getElementById('d-pin').value;
+  if(!id){ toast('Select your name'); return; }
+  const driver=DB.drivers.find(d=>d.id===id);
+  if(!driver){ toast('Driver not found'); return; }
+  // PIN check: any 4-digit or blank = 0000 for demo
+  if(pin&&pin!=='0000'&&pin!==driver.pin){ toast('Incorrect PIN'); return; }
+  dApp.driverId=id;
+  document.getElementById('d-login').style.display='none';
+  document.getElementById('d-main').style.display='block';
+  updateTopbar();
+  showScreen('home');
+  toast('Welcome, '+driver.name.split(' ')[0]+'! 👋');
+  // Start notification system
+  initNotifications();
+}
+
+// Current driver
+function me(){ return DB.drivers.find(d=>d.id===dApp.driverId)||{}; }
+function myLoads(){ return (DB.loads||[]).filter(l=>l.driverId===dApp.driverId); }
+function activeLoad(){ return myLoads().find(l=>['In Transit','Loaded'].includes(l.status)); }
+
+// Helpers
+function fmtUSD(n){ return '$'+(+n||0).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0}); }
+function fmtNum(n){ return (+n||0).toLocaleString(); }
+function fmtDate(s){ if(!s)return'—'; try{ const d=new Date(s+'T00:00:00'); return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'2-digit'}); }catch(e){ return s; } }
+function daysUntil(s){ if(!s)return null; const d=(new Date(s+'T00:00:00')-new Date())/(1000*60*60*24); return Math.ceil(d); }
+
+// Gross pay calc
+function myPay(l){
+  const d=me();
+  const rate=(d.payRate||28)/100;
+  const base=((l.gross||0)+(l.fsc||0))*rate;
+  return Math.round(base);
+}
+
+// YTD stats
+function ytd(){
+  const loads=myLoads().filter(l=>l.status==='Delivered'||l.status==='Paid');
+  const year=new Date().getFullYear().toString();
+  const yearLoads=loads.filter(l=>(l.date||'').startsWith(year));
+  return {
+    loads: yearLoads.length,
+    miles: yearLoads.reduce((s,l)=>s+(l.miles||0),0),
+    gross: yearLoads.reduce((s,l)=>s+(l.gross||0)+(l.fsc||0),0),
+    pay:   yearLoads.reduce((s,l)=>s+myPay(l),0),
+  };
+}
+
+// Save data
+function saveData(){
+  try{
+    // ── Save driver-side delta (fast, small) ──
+    const delta = {
+      loads: DB.loads.filter(l=>{
+        const orig = EMBEDDED_LOADS.find(x=>x.id===l.id);
+        return !orig || l.status!==orig.status || l.podStatus!==orig.podStatus ||
+               l.actualDeliveryTime!==orig.actualDeliveryTime || l.actualPickupTime!==orig.actualPickupTime;
+      }),
+      drivers: DB.drivers.filter(d=>{
+        const orig = EMBEDDED_DRIVERS.find(x=>x.id===d.id);
+        return !orig || d.dispatchStatus!==orig.dispatchStatus;
+      }),
+      newDvir: DB.dvirRecords.filter(r=>r.id.startsWith('DVIR-')),
+      driverChecklist: DB.driverChecklist,
+      photos:         dApp.photos         || {},
+      signatures:     dApp.signatures     || {},
+      checkCalls:     dApp.checkCalls     || {},
+      photoTag:       dApp.photoTag       || 'BOL',
+      dvirMedia:      dApp.dvirMedia      || {},
+      dvirNotes:      dApp.dvirNotes      || {},
+      dvirType:       dApp.dvirType       || 'pre',
+      chatMessages:   dApp.chatMessages   || [],
+      toolTab:        dApp.toolTab        || 'weather',
+      fuelSearchCity: dApp.fuelSearchCity || '',
+    };
+    localStorage.setItem('parchies-driver-db', JSON.stringify(delta));
+
+    // ── Also write critical changes back to office DB ──
+    // This ensures office sees load status changes, driver status, DVIRs
+    try {
+      const officeRaw = localStorage.getItem('parchies_tms_db');
+      if(officeRaw){
+        const officeDB = JSON.parse(officeRaw);
+        let changed = false;
+
+        // Sync load status changes (mark delivered, POD updates)
+        delta.loads.forEach(dl => {
+          const idx = (officeDB.loads||[]).findIndex(l=>l.id===dl.id);
+          if(idx > -1){
+            Object.assign(officeDB.loads[idx], dl);
+            changed = true;
+          }
+        });
+
+        // Sync driver dispatch status
+        delta.drivers.forEach(dd => {
+          const idx = (officeDB.drivers||[]).findIndex(d=>d.id===dd.id);
+          if(idx > -1){
+            officeDB.drivers[idx].dispatchStatus = dd.dispatchStatus;
+            changed = true;
+          }
+        });
+
+        // Sync new DVIRs submitted by driver
+        delta.newDvir.forEach(r => {
+          if(!(officeDB.dvirRecords||[]).find(x=>x.id===r.id)){
+            if(!officeDB.dvirRecords) officeDB.dvirRecords = [];
+            officeDB.dvirRecords.unshift(r);
+            changed = true;
+          }
+        });
+
+        if(changed){
+          localStorage.setItem('parchies_tms_db', JSON.stringify(officeDB));
+        }
+      }
+    } catch(e){ }
+
+  }catch(e){ }
+}
+
+// Update topbar
+function updateTopbar(){
+  const d=me();
+  const al=activeLoad();
+  document.getElementById('d-driver-name').textContent=d.name||'Driver';
+  document.getElementById('d-driver-unit').textContent=(d.tractor||'No unit')+' · '+(d.dispatchStatus||'Off Duty');
+  const dot=document.getElementById('d-status-dot');
+  const colors={'Available':'#2D7D0A','Loaded':'#F59E0B','In Transit':'#0284C7','Home Time':'#7C3AED','Off Duty':'#6B7280'};
+  dot.style.background=colors[d.dispatchStatus]||'#6B7280';
+  const badge=document.getElementById('d-topbar-badge');
+  if(al){ badge.textContent='📦 '+al.id; badge.style.background='rgba(2,132,199,.25)'; badge.style.color='#93C5FD'; }
+  else{ badge.textContent=d.dispatchStatus||'Off Duty'; badge.style.background='rgba(255,255,255,.08)'; badge.style.color='rgba(255,255,255,.6)'; }
+}
+
+// ─── SCREENS ─────────────────────────────────────────────────
+
+function showScreen(screen){
+  dApp.screen=screen;
+  // Update tab states
+  ['home','load','dvir','history','me'].forEach(t=>{
+    const tab=document.getElementById('tab-'+t);
+    if(tab) tab.classList.toggle('active', t===screen);
+  });
+  const content=document.getElementById('d-content');
+  content.scrollTop=0;
+  switch(screen){
+    case 'home':    content.innerHTML=renderHome();    break;
+    case 'load':    content.innerHTML=renderLoad();    break;
+    case 'dvir':    content.innerHTML=renderDVIR();    break;
+    case 'history': content.innerHTML=renderHistory(); break;
+    case 'me':      content.innerHTML=renderMe();      break;
+    case 'tools':   content.innerHTML=renderTools();   break;
+  }
+  updateTopbar();
+}
+
+// ── HOME SCREEN ───────────────────────────────────────────────
+function renderHome(){
+  const d=me();
+  const al=activeLoad();
+  const y=ytd();
+  const hos=(DB.hos||[]).find(h=>h.driverId===dApp.driverId);
+  const statusColors={'Available':'#2D7D0A','Loaded':'#F59E0B','In Transit':'#0284C7','Home Time':'#7C3AED','Off Duty':'#6B7280'};
+  const sc=statusColors[d.dispatchStatus]||'#6B7280';
+  const hosDriveLeft=hos?.driveRemaining||'11:00';
+  const hosPct=hos?(parseFloat(hosDriveLeft)*100/11):100;
+  const hosColor=hosPct>50?'#2D7D0A':hosPct>25?'#F59E0B':'#C0321A';
+
+  return `
+  <div style="padding:4px 0 16px">
+    <!-- Driver Status -->
+    <div class="d-card">
+      <div class="d-card-header">My Status</div>
+      <div class="d-card-body">
+        <div class="d-status-grid">
+          ${['Available','Loaded','In Transit','Home Time'].map(s=>`
+            <div class="d-status-btn ${d.dispatchStatus===s?'active-'+s.toLowerCase().replace(' ','-'):''}"
+              onclick="setStatus('${s}')">${s}</div>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+
+    <!-- YTD Stats -->
+    <div class="d-kpi-row">
+      <div class="d-kpi">
+        <div class="d-kpi-label">YTD Loads</div>
+        <div class="d-kpi-val" style="color:#0284C7">${y.loads}</div>
+      </div>
+      <div class="d-kpi">
+        <div class="d-kpi-label">YTD Miles</div>
+        <div class="d-kpi-val">${fmtNum(y.miles)}</div>
+      </div>
+      <div class="d-kpi">
+        <div class="d-kpi-label">YTD Gross</div>
+        <div class="d-kpi-val" style="color:#0284C7">${fmtUSD(y.gross)}</div>
+      </div>
+      <div class="d-kpi">
+        <div class="d-kpi-label">My Pay YTD</div>
+        <div class="d-kpi-val" style="color:#2D7D0A">${fmtUSD(y.pay)}</div>
+      </div>
+    </div>
+
+    <!-- HOS Summary -->
+    ${hos?`<div class="d-card">
+      <div class="d-card-header">⏱ Hours of Service</div>
+      <div class="d-card-body">
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+          <span style="font-size:13px;color:var(--c-text2)">Drive Time Remaining</span>
+          <span style="font-size:15px;font-weight:800;color:${hosColor}">${hosDriveLeft}</span>
+        </div>
+        <div class="d-hos-bar">
+          <div class="d-hos-fill" style="width:${Math.min(100,hosPct)}%;background:${hosColor}"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:8px;font-size:11px;color:var(--c-text3)">
+          <span>Status: ${hos.status||'Off Duty'}</span>
+          <span>Cycle: ${hos.cycleUsed||0}h used of 70h</span>
+        </div>
+      </div>
+    </div>`:''}
+
+    <!-- Active Load Quick View -->
+    ${al?`<div class="d-load-card">
+      <div style="padding:14px;border-bottom:1px solid #F1F5F9">
+        <div style="font-size:10px;font-weight:700;color:var(--c-cyan);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Active Load · ${al.id}</div>
+        <div class="d-route">${(al.origin||'').split(',')[0]}<span class="d-route-arrow">→</span>${(al.dest||'').split(',')[0]}</div>
+        <div style="font-size:12px;color:var(--c-text3);margin-top:4px">${fmtNum(al.miles)} mi · ${al.broker||'—'}</div>
+      </div>
+      <div style="padding:12px 14px;display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div><div style="font-size:10px;color:var(--c-text3);margin-bottom:2px">GROSS</div><div style="font-size:15px;font-weight:700;color:#0284C7">${fmtUSD(al.gross)}</div></div>
+        <div><div style="font-size:10px;color:var(--c-text3);margin-bottom:2px">MY PAY</div><div style="font-size:15px;font-weight:700;color:#2D7D0A">${fmtUSD(myPay(al))}</div></div>
+      </div>
+      <div style="padding:0 14px 14px;display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <button class="d-btn d-btn-green" onclick="markDelivered('${al.id}')">✓ Delivered</button>
+        <button class="d-btn d-btn-ghost" onclick="showScreen('load')">View Details →</button>
+      </div>
+    </div>`:`<div class="d-card">
+      <div class="d-card-body" style="text-align:center;padding:30px">
+        <div style="font-size:40px;margin-bottom:8px">🚛</div>
+        <div style="font-size:15px;font-weight:700;color:var(--c-text2)">No Active Load</div>
+        <div style="font-size:12px;color:var(--c-text3);margin-top:4px">Contact dispatch for your next assignment</div>
+        <div style="margin-top:16px">
+          <a href="tel:7065550100" class="d-btn d-btn-primary" style="text-decoration:none;display:inline-flex">📞 Call Dispatch</a>
+        </div>
+      </div>
+    </div>`}
+
+    <!-- Compliance Alerts -->
+    ${renderComplianceAlerts()}
+  </div>`;
+}
+
+function renderComplianceAlerts(){
+  const d=me();
+  const alerts=[];
+  const cdlDays=daysUntil(d.cdlExpiry);
+  const medDays=daysUntil(d.medExpiry||d.medCardExpiry);
+  if(cdlDays!==null&&cdlDays<=30) alerts.push({icon:'📋',text:'CDL expires in '+cdlDays+'d',color:'#FEF9C3',tc:'#854D0E'});
+  if(medDays!==null&&medDays<=30) alerts.push({icon:'🏥',text:'Med Card expires in '+medDays+'d',color:'#FEE2E2',tc:'#991B1B'});
+  if(!alerts.length) return '';
+  return `<div style="margin:0 12px 8px">
+    ${alerts.map(a=>`<div style="background:${a.color};border-radius:var(--r2);padding:12px 14px;margin-bottom:6px;display:flex;align-items:center;gap:10px">
+      <span style="font-size:20px">${a.icon}</span>
+      <span style="font-size:13px;font-weight:700;color:${a.tc}">${a.text}</span>
+    </div>`).join('')}
+  </div>`;
+}
+
+// ── MY LOAD SCREEN ────────────────────────────────────────────
+function renderLoad(){
+  const al=activeLoad();
+  if(!al) return `
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:60vh;text-align:center;padding:20px">
+      <div style="font-size:50px;margin-bottom:12px">📦</div>
+      <div style="font-size:17px;font-weight:700;color:var(--c-text2)">No Active Load</div>
+      <div style="font-size:13px;color:var(--c-text3);margin-top:6px;line-height:1.5">You don't have an active load assigned.<br>Contact dispatch for your next run.</div>
+      <a href="tel:7065550100" style="margin-top:20px" class="d-btn d-btn-primary" style="text-decoration:none;display:inline-flex">📞 Call Dispatch</a>
+    </div>`;
+
+  const statusBadge={'Pending':'d-badge-amber','Loaded':'d-badge-amber','In Transit':'d-badge-blue','Delivered':'d-badge-green'}[al.status]||'d-badge-blue';
+  const checklist=DB.driverChecklist?.[dApp.driverId]||[];
+  const done=checklist.filter(c=>c.done).length;
+
+  return `
+  <div style="padding:4px 0 16px">
+    <!-- Load Header -->
+    <div class="d-card">
+      <div style="padding:16px 14px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <div style="font-size:12px;font-family:monospace;font-weight:700;color:var(--c-text3)">${al.id}</div>
+          <span class="d-badge ${statusBadge}">${al.status}</span>
+        </div>
+        <div class="d-route" style="font-size:20px">${(al.origin||'').split(',')[0]}</div>
+        <div style="font-size:24px;color:var(--c-cyan);margin:4px 0">↓</div>
+        <div class="d-route" style="font-size:20px">${(al.dest||'').split(',')[0]}</div>
+        <div style="font-size:12px;color:var(--c-text3);margin-top:8px">${al.origin||'—'} → ${al.dest||'—'}</div>
+      </div>
+    </div>
+
+    <!-- Load Details -->
+    <div class="d-kpi-row" style="grid-template-columns:1fr 1fr 1fr">
+      <div class="d-kpi"><div class="d-kpi-label">Miles</div><div class="d-kpi-val" style="font-size:18px">${fmtNum(al.miles)}</div></div>
+      <div class="d-kpi"><div class="d-kpi-label">Gross</div><div class="d-kpi-val" style="font-size:18px;color:#0284C7">${fmtUSD(al.gross)}</div></div>
+      <div class="d-kpi"><div class="d-kpi-label">My Pay</div><div class="d-kpi-val" style="font-size:18px;color:#2D7D0A">${fmtUSD(myPay(al))}</div></div>
+    </div>
+
+    <!-- Details -->
+    <div class="d-card">
+      <div class="d-card-header">Load Details</div>
+      <div class="d-card-body" style="display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--c-text3);font-size:13px">Broker</span><span style="font-weight:600">${al.broker||'—'}</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--c-text3);font-size:13px">Commodity</span><span style="font-weight:600">${al.commodity||'General Freight'}</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--c-text3);font-size:13px">Weight</span><span style="font-weight:600">${al.weight?fmtNum(al.weight)+' lbs':'—'}</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--c-text3);font-size:13px">BOL #</span><span style="font-weight:600;font-family:monospace">${al.bolNumber||'—'}</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--c-text3);font-size:13px">Pickup Appt</span><span style="font-weight:600">${al.pickupAppt?new Date(al.pickupAppt).toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}):'—'}</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--c-text3);font-size:13px">Delivery Appt</span><span style="font-weight:600">${al.deliveryAppt?new Date(al.deliveryAppt).toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}):'—'}</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--c-text3);font-size:13px">Tractor</span><span style="font-weight:600">${al.tractor||'—'}</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--c-text3);font-size:13px">Trailer</span><span style="font-weight:600">${al.trailer||'—'}</span></div>
+      </div>
+    </div>
+
+    <!-- Checklist -->
+    ${checklist.length>0?`<div class="d-card">
+      <div class="d-card-header">Load Checklist <span style="margin-left:auto;font-size:11px;color:var(--c-text3)">${done}/${checklist.length}</span></div>
+      <div class="d-card-body" style="padding:0 14px">
+        ${checklist.map(item=>`<div class="d-check-item">
+          <div class="d-check-box ${item.done?'done':''}" onclick="toggleCheck('${item.id}')">${item.done?'✓':''}</div>
+          <span style="font-size:14px;${item.done?'text-decoration:line-through;color:var(--c-text3)':'color:var(--c-text)'}">${item.text}</span>
+        </div>`).join('')}
+      </div>
+    </div>`:''}
+
+    <!-- CHECK CALL -->
+    <div class="d-check-call-card">
+      <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px">📞 One-Tap Check Call</div>
+      <div style="font-size:12px;color:rgba(255,255,255,.7);margin-bottom:12px;line-height:1.5" id="d-check-msg">
+        ${buildCheckCallMsg(al)}
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <button class="d-btn" style="background:rgba(255,255,255,.1);color:#fff;font-size:12px" onclick="sendCheckCall('${al.id}','sms')">📱 Text Dispatch</button>
+        <button class="d-btn" style="background:rgba(255,255,255,.1);color:#fff;font-size:12px" onclick="sendCheckCall('${al.id}','email')">✉ Email Dispatch</button>
+      </div>
+    </div>
+
+    <!-- PHOTOS (BOL / POD / Damage) -->
+    <div class="d-card" style="margin-bottom:8px">
+      <div class="d-card-header">📷 Photos
+        <span style="margin-left:auto;font-size:10px;color:var(--c-text3)">${(dApp.photos[al.id]||[]).length} captured</span>
+      </div>
+      <div class="d-card-body" style="padding-top:8px">
+        <div style="display:flex;gap:8px;margin-bottom:8px">
+          ${['BOL','POD','Damage','Other'].map(tag=>`
+            <div style="flex:1;text-align:center;padding:8px 4px;border-radius:var(--r);background:${dApp.photoTag===tag?'#0284C7':'#F1F5F9'};color:${dApp.photoTag===tag?'#fff':'var(--c-text3)'};font-size:11px;font-weight:700;cursor:pointer"
+              onclick="dApp.photoTag='${tag}';showScreen('load')">${tag}</div>
+          `).join('')}
+        </div>
+        <div class="d-photo-grid">
+          ${(dApp.photos[al.id]||[]).map((p,i)=>`
+            <div class="d-photo-thumb" onclick="viewPhoto(${i},'${al.id}')">
+              <img src="${p.data}" alt="${p.tag}"/>
+              <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.55);color:#fff;font-size:9px;font-weight:700;padding:2px 4px">${p.tag}</div>
+              <button class="d-photo-del" onclick="event.stopPropagation();deletePhoto(${i},'${al.id}')">✕</button>
+            </div>`).join('')}
+          <label class="d-photo-add" for="d-photo-input-${al.id}">
+            <span>📷</span>Tap to capture
+          </label>
+          <input type="file" accept="image/*" capture="environment" id="d-photo-input-${al.id}" style="display:none"
+            onchange="capturePhoto(event,'${al.id}')"/>
+        </div>
+      </div>
+    </div>
+
+    <!-- SIGNATURE -->
+    <div class="d-card" style="margin-bottom:8px">
+      <div class="d-card-header">✍ Signature
+        <span style="margin-left:auto;font-size:10px;color:${dApp.signatures[al.id]?'#2D7D0A':'var(--c-text3)'}">
+          ${dApp.signatures[al.id]?'✓ Signed':'Not signed'}
+        </span>
+      </div>
+      <div class="d-card-body">
+        ${dApp.signatures[al.id]?`
+          <div style="text-align:center">
+            <img src="${dApp.signatures[al.id].data}" style="max-width:100%;border:1px solid #E2E8F0;border-radius:var(--r);"/>
+            <div style="font-size:11px;color:var(--c-text3);margin-top:6px">Signed by ${dApp.signatures[al.id].name} · ${dApp.signatures[al.id].time}</div>
+            <button class="d-btn d-btn-ghost" style="margin-top:8px;font-size:12px" onclick="clearSignature('${al.id}')">Clear & Re-sign</button>
+          </div>
+        `:`
+          <div style="font-size:12px;color:var(--c-text3);margin-bottom:8px">Draw signature below (finger or stylus):</div>
+          <canvas class="d-sig-canvas" id="d-sig-${al.id}" width="600" height="180"></canvas>
+          <div style="display:flex;gap:8px;margin-top:10px">
+            <button class="d-btn d-btn-ghost" style="flex:1;font-size:12px" onclick="clearCanvas('${al.id}')">Clear</button>
+            <button class="d-btn d-btn-green" style="flex:1;font-size:12px" onclick="saveSignature('${al.id}')">✓ Save Signature</button>
+          </div>
+          <div style="font-size:10px;color:var(--c-text3);text-align:center;margin-top:6px">Used for BOL, Rate Con & POD confirmation</div>
+        `}
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div style="margin:0 12px;display:flex;flex-direction:column;gap:8px">
+      <button class="d-btn d-btn-green" onclick="markDelivered('${al.id}')">✓ Mark Delivered</button>
+      <button class="d-btn d-btn-amber" onclick="reportDetention('${al.id}')">⏱ Report Detention</button>
+      <a href="https://maps.google.com/maps?daddr=${encodeURIComponent(al.dest)}" target="_blank" class="d-btn d-btn-ghost" style="text-decoration:none">🗺 Navigate to Delivery</a>
+    </div>
+  </div>`;
+
+  // Init signature canvas after render
+  setTimeout(()=>initSigCanvas('${al.id}'), 100);
+}
+
+// ── DVIR SCREEN ───────────────────────────────────────────────
+function renderDVIR(){
+  const d=me();
+  if(!dApp.dvirType)   dApp.dvirType   = 'pre';
+  if(!dApp.dvirMedia)  dApp.dvirMedia  = {};   // {itemId: [{type,data,thumb,dur}]}
+  if(!dApp.dvirNotes)  dApp.dvirNotes  = {};   // {itemId: noteText}
+  if(!dApp.dvirExpanded) dApp.dvirExpanded = {};
+
+  const inspItems=[
+    {id:'lights',  cat:'Exterior', label:'Lights & Reflectors',   icon:'💡'},
+    {id:'tires',   cat:'Exterior', label:'Tires & Wheels',         icon:'🔵'},
+    {id:'mirrors', cat:'Exterior', label:'Mirrors',                icon:'🪞'},
+    {id:'wipers',  cat:'Cab',      label:'Windshield & Wipers',    icon:'🌧'},
+    {id:'brakes',  cat:'Brakes',   label:'Service Brakes',         icon:'🛑'},
+    {id:'airbrakes',cat:'Brakes',  label:'Air Brakes / Parking',   icon:'💨'},
+    {id:'steering',cat:'Cab',      label:'Steering',               icon:'🎡'},
+    {id:'horn',    cat:'Cab',      label:'Horn',                   icon:'📯'},
+    {id:'heater',  cat:'Cab',      label:'Heater & Defroster',     icon:'🌡'},
+    {id:'seatbelt',cat:'Cab',      label:'Seat Belt',              icon:'🪝'},
+    {id:'coupling',cat:'Coupling', label:'Coupling Devices',       icon:'🔗'},
+    {id:'emergency',cat:'Emergency',label:'Emergency Equipment',   icon:'🚨'},
+    {id:'fuelleak',cat:'Engine',   label:'Fuel & Oil Leaks',       icon:'🛢'},
+    {id:'engine',  cat:'Engine',   label:'Engine Compartment',     icon:'⚙️'},
+  ];
+  const checks    = dApp.dvirChecks;
+  const checkCount= Object.values(checks).filter(v=>v).length;
+  const cats      = [...new Set(inspItems.map(i=>i.cat))];
+  const totalMedia= Object.values(dApp.dvirMedia).reduce((s,m)=>s+m.length,0);
+  const pct       = Math.round(checkCount/inspItems.length*100);
+  const pctColor  = pct===100?'#2D7D0A':pct>60?'#B45309':'#C0321A';
+
+  return `
+  <div style="padding:4px 0 16px">
+
+    <!-- Type selector -->
+    <div style="margin:10px 12px 0">
+      <div class="d-dvir-type-bar">
+        <button class="d-dvir-type-btn ${dApp.dvirType==='pre'?'active':''}"
+          onclick="dApp.dvirType='pre';showScreen('dvir')">🌅 Pre-Trip</button>
+        <button class="d-dvir-type-btn ${dApp.dvirType==='post'?'active':''}"
+          onclick="dApp.dvirType='post';showScreen('dvir')">🌙 Post-Trip</button>
+      </div>
+    </div>
+
+    <!-- Progress -->
+    <div class="d-card">
+      <div class="d-card-header">
+        ${dApp.dvirType==='pre'?'🌅 Pre-Trip':'🌙 Post-Trip'} Inspection
+        <span style="margin-left:auto;font-size:11px;font-weight:700;color:${pctColor}">${checkCount}/${inspItems.length} · ${pct}%</span>
+      </div>
+      <div class="d-card-body" style="padding:8px 14px">
+        <div class="d-progress-bar">
+          <div class="d-progress-fill" style="width:${pct}%;background:${pctColor}"></div>
+        </div>
+        <div style="font-size:11px;color:var(--c-text3);display:flex;justify-content:space-between">
+          <span>${d.tractor||'Unit'} · ${new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}</span>
+          <span>${totalMedia} media file${totalMedia!==1?'s':''} attached</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Checklist by category -->
+    ${cats.map(cat=>`
+      <div class="d-section">${cat}</div>
+      <div class="d-card">
+        <div style="padding:0 14px">
+          ${inspItems.filter(i=>i.cat===cat).map(item=>{
+            const media   = dApp.dvirMedia[item.id]||[];
+            const note    = dApp.dvirNotes[item.id]||'';
+            const expanded= dApp.dvirExpanded[item.id];
+            const hasIssue= !checks[item.id];
+            return `
+            <div class="d-dvir-item" style="flex-direction:column;align-items:stretch;padding:10px 0">
+              <div style="display:flex;align-items:center;gap:12px">
+                <div class="d-dvir-checkbox ${checks[item.id]?'checked':''}"
+                  onclick="toggleDVIR('${item.id}')">${checks[item.id]?'✓':''}</div>
+                <span style="flex:1;font-size:14px;color:${checks[item.id]?'var(--c-text3)':'var(--c-text)'};${checks[item.id]?'text-decoration:line-through':''}">
+                  ${item.icon} ${item.label}
+                </span>
+                <div style="display:flex;align-items:center;gap:6px">
+                  ${media.length?`<span style="font-size:10px;background:#EFF9FF;color:#0369A1;padding:2px 6px;border-radius:99px;font-weight:700">${media.length}📎</span>`:''}
+                  <button onclick="dApp.dvirExpanded['${item.id}']=!dApp.dvirExpanded['${item.id}'];showScreen('dvir')"
+                    style="background:none;border:none;font-size:16px;cursor:pointer;color:var(--c-text3);padding:4px">
+                    ${expanded?'▲':'▼'}
+                  </button>
+                </div>
+              </div>
+              ${expanded?`
+              <div class="d-dvir-item-expanded">
+                <!-- Media thumbnails -->
+                ${media.length?`<div class="d-dvir-media-row">
+                  ${media.map((m,mi)=>`
+                    <div class="d-dvir-media-thumb" onclick="viewDvirMedia('${item.id}',${mi})">
+                      ${m.type==='video'
+                        ?`<video src="${m.data}" muted playsinline style="pointer-events:none"></video><div class="d-video-badge">▶ VID</div>`
+                        :`<img src="${m.data}"/>`}
+                      <button class="d-media-del" onclick="event.stopPropagation();deleteDvirMedia('${item.id}',${mi})">✕</button>
+                    </div>`).join('')}
+                </div>`:''}
+                <!-- Add media buttons -->
+                <div class="d-dvir-add-media">
+                  <label class="d-dvir-add-btn" for="d-dvir-photo-${item.id}">
+                    <span>📷</span>Add Photo
+                  </label>
+                  <input type="file" accept="image/*" capture="environment"
+                    id="d-dvir-photo-${item.id}" style="display:none"
+                    onchange="addDvirMedia(event,'${item.id}','photo')"/>
+                  <label class="d-dvir-add-btn" for="d-dvir-video-${item.id}">
+                    <span>🎥</span>Record Video
+                  </label>
+                  <input type="file" accept="video/*" capture="environment"
+                    id="d-dvir-video-${item.id}" style="display:none"
+                    onchange="addDvirMedia(event,'${item.id}','video')"/>
+                </div>
+                <!-- Text note -->
+                <textarea
+                  id="d-dvir-note-${item.id}"
+                  style="width:100%;border:1.5px solid #E2E8F0;border-radius:var(--r);padding:8px;font-family:var(--font);font-size:13px;resize:none;outline:none;min-height:60px;margin-top:8px;background:#fff"
+                  placeholder="Note for ${item.label} (tap to type)..."
+                  onchange="dApp.dvirNotes['${item.id}']=this.value;saveData()"
+                  >${note}</textarea>
+              </div>`:''}
+            </div>`;
+          }).join('')}
+        </div>
+      </div>`).join('')}
+
+    <!-- General notes + submit -->
+    <div class="d-card">
+      <div class="d-card-header">📝 General Notes</div>
+      <div class="d-card-body">
+        <!-- General media for whole inspection -->
+        <div style="font-size:12px;color:var(--c-text2);font-weight:600;margin-bottom:8px">Overall inspection photos / walk-around video:</div>
+        <div class="d-dvir-media-row" id="d-dvir-general-media">
+          ${(dApp.dvirMedia['general']||[]).map((m,mi)=>`
+            <div class="d-dvir-media-thumb" onclick="viewDvirMedia('general',${mi})">
+              ${m.type==='video'
+                ?`<video src="${m.data}" muted playsinline style="pointer-events:none"></video><div class="d-video-badge">▶ VID</div>`
+                :`<img src="${m.data}"/>`}
+              <button class="d-media-del" onclick="event.stopPropagation();deleteDvirMedia('general',${mi})">✕</button>
+            </div>`).join('')}
+        </div>
+        <div class="d-dvir-add-media" style="margin-top:8px">
+          <label class="d-dvir-add-btn" for="d-dvir-gen-photo">
+            <span>📷</span>Walk-Around Photo
+          </label>
+          <input type="file" accept="image/*" capture="environment" id="d-dvir-gen-photo" style="display:none"
+            onchange="addDvirMedia(event,'general','photo')"/>
+          <label class="d-dvir-add-btn" for="d-dvir-gen-video">
+            <span>🎥</span>Walk-Around Video
+          </label>
+          <input type="file" accept="video/*" capture="environment" id="d-dvir-gen-video" style="display:none"
+            onchange="addDvirMedia(event,'general','video')"/>
+        </div>
+        <textarea id="d-dvir-notes" style="width:100%;border:1.5px solid #E2E8F0;border-radius:var(--r);padding:10px;font-family:var(--font);font-size:14px;resize:none;outline:none;min-height:70px;margin-top:10px"
+          placeholder="General defects, notes, or observations..."></textarea>
+      </div>
+    </div>
+
+    <div style="margin:0 12px;display:flex;flex-direction:column;gap:8px">
+      <button class="d-btn d-btn-green" onclick="submitDVIR(dApp.dvirType)">
+        ✓ Submit ${dApp.dvirType==='pre'?'Pre-Trip':'Post-Trip'} — ${d.tractor||'Unit'}
+      </button>
+    </div>
+
+    <!-- Recent DVIRs with media indicator -->
+    <div class="d-section">Recent Inspections</div>
+    <div class="d-card">
+      <div class="d-card-body" style="padding:0 14px">
+        ${(DB.dvirRecords||[]).filter(r=>r.driverId===dApp.driverId).slice(0,5).map(r=>`
+          <div class="d-dvir-item">
+            <div style="font-size:20px">${r.result==='Satisfactory'?'✅':'⚠️'}</div>
+            <div style="flex:1">
+              <div style="font-size:13px;font-weight:700">${r.type} — ${r.unit}</div>
+              <div style="font-size:11px;color:var(--c-text3)">${fmtDate(r.date)} · ${r.result}</div>
+              ${r.defects?.length?`<div style="font-size:11px;color:#B45309;margin-top:2px">⚠ ${r.defects.join(', ')}</div>`:''}
+              ${r.mediaCount?`<div style="font-size:10px;color:#0369A1;margin-top:2px">📎 ${r.mediaCount} media file${r.mediaCount!==1?'s':''} attached</div>`:''}
+            </div>
+          </div>`).join('')||'<div style="text-align:center;padding:20px;color:var(--c-text3);font-size:13px">No DVIR history</div>'}
+      </div>
+    </div>
+  </div>`;
+}
+
+
+// ── HISTORY SCREEN ────────────────────────────────────────────
+function renderHistory(){
+  const loads=[...myLoads()].sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const setts=(DB.settlements||[]).filter(s=>s.driverId===dApp.driverId).sort((a,b)=>(b.weekEnding||'').localeCompare(a.weekEnding||''));
+  return `
+  <div style="padding:4px 0 16px">
+    <div class="d-section">My Loads (${loads.length})</div>
+    <div class="d-card">
+      <div style="padding:0 14px">
+        ${loads.slice(0,20).map(l=>`
+          <div class="d-list-item" onclick="showLoadDetail('${l.id}')">
+            <div style="flex:1">
+              <div style="font-size:13px;font-weight:700">${(l.origin||'').split(',')[0]} → ${(l.dest||'').split(',')[0]}</div>
+              <div style="font-size:11px;color:var(--c-text3);margin-top:2px">${l.id} · ${fmtDate(l.date)} · ${fmtNum(l.miles)} mi</div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-size:14px;font-weight:700;color:#2D7D0A">${fmtUSD(myPay(l))}</div>
+              <div style="font-size:10px;color:var(--c-text3)">${l.status}</div>
+            </div>
+          </div>`).join('')||'<div style="padding:20px;text-align:center;color:var(--c-text3)">No loads found</div>'}
+      </div>
+    </div>
+
+    <div class="d-section">Settlements</div>
+    <div class="d-card">
+      <div style="padding:0 14px">
+        ${setts.slice(0,10).map(s=>`
+          <div class="d-list-item">
+            <div style="flex:1">
+              <div style="font-size:13px;font-weight:700">Week ending ${fmtDate(s.weekEnding)}</div>
+              <div style="font-size:11px;color:var(--c-text3);margin-top:2px">Check #${s.checkNum||s.checkNumber||'—'} · ${s.status}</div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-size:14px;font-weight:700;color:${s.status==='Paid'?'#2D7D0A':'#B45309'}">${fmtUSD(s.netPay)}</div>
+              <div style="font-size:10px;color:var(--c-text3)">${s.status}</div>
+            </div>
+          </div>`).join('')||'<div style="padding:20px;text-align:center;color:var(--c-text3)">No settlements</div>'}
+      </div>
+    </div>
+  </div>`;
+}
+
+// ── ME SCREEN ─────────────────────────────────────────────────
+function renderMe(){
+  const d=me();
+  const cdlDays=daysUntil(d.cdlExpiry);
+  const medDays=daysUntil(d.medExpiry||d.medCardExpiry);
+  return `
+  <div style="padding:4px 0 16px">
+    <!-- Profile Header -->
+    <div class="d-card">
+      <div style="padding:20px;text-align:center">
+        <div style="width:72px;height:72px;border-radius:50%;background:#0284C7;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800;color:#fff;margin:0 auto 12px">${(d.name||'?').split(' ').map(n=>n[0]).join('')}</div>
+        <div style="font-size:20px;font-weight:800">${d.name||'Driver'}</div>
+        <div style="font-size:13px;color:var(--c-text3);margin-top:4px">${d.id} · CDL-${d.cdlClass||'A'} · ${d.tractor||'No unit'}</div>
+        <div style="margin-top:10px">
+          <span class="d-badge ${d.dispatchStatus==='Available'?'d-badge-green':d.dispatchStatus==='In Transit'?'d-badge-blue':'d-badge-amber'}">${d.dispatchStatus||'Off Duty'}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Compliance Docs -->
+    <div class="d-section">Documents & Compliance</div>
+    <div class="d-card">
+      <div style="padding:0 14px">
+        <div class="d-list-item">
+          <span style="font-size:18px">📋</span>
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:600">CDL — ${d.cdlState||'GA'} ${d.cdl||'—'}</div>
+            <div style="font-size:11px;color:${cdlDays!==null&&cdlDays<30?'#C0321A':'var(--c-text3)'}">Expires ${fmtDate(d.cdlExpiry)}${cdlDays!==null?' ('+cdlDays+'d)':''}</div>
+          </div>
+          <span style="font-size:18px">${cdlDays!==null&&cdlDays<30?'⚠️':'✅'}</span>
+        </div>
+        <div class="d-list-item">
+          <span style="font-size:18px">🏥</span>
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:600">Medical Certificate</div>
+            <div style="font-size:11px;color:${medDays!==null&&medDays<30?'#C0321A':'var(--c-text3)'}">Expires ${fmtDate(d.medExpiry||d.medCardExpiry)}${medDays!==null?' ('+medDays+'d)':''}</div>
+          </div>
+          <span style="font-size:18px">${medDays!==null&&medDays<30?'⚠️':'✅'}</span>
+        </div>
+        <div class="d-list-item">
+          <span style="font-size:18px">📄</span>
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:600">W-9 Status</div>
+            <div style="font-size:11px;color:var(--c-text3)">${d.w9Status==='Missing'?'Missing — contact office':'On file'}</div>
+          </div>
+          <span style="font-size:18px">${d.w9Status==='Missing'?'⚠️':'✅'}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contact -->
+    <div class="d-section">Contact</div>
+    <div class="d-card">
+      <div style="padding:0 14px">
+        <div class="d-list-item"><span style="font-size:18px">📞</span><div><div style="font-size:13px;font-weight:600">${d.phone||'—'}</div><div style="font-size:11px;color:var(--c-text3)">My Phone</div></div></div>
+        <div class="d-list-item"><span style="font-size:18px">📧</span><div><div style="font-size:13px;font-weight:600">${d.email||'—'}</div><div style="font-size:11px;color:var(--c-text3)">Email</div></div></div>
+        <div class="d-list-item"><span style="font-size:18px">🏠</span><div><div style="font-size:13px;font-weight:600">${d.address||'—'}, ${d.city||''}, ${d.addrState||''}</div><div style="font-size:11px;color:var(--c-text3)">Home Address</div></div></div>
+        ${d.emergencyName?`<div class="d-list-item"><span style="font-size:18px">🚨</span><div><div style="font-size:13px;font-weight:600">${d.emergencyName}</div><div style="font-size:11px;color:var(--c-text3)">Emergency: ${d.emergencyPhone||'—'}</div></div></div>`:''}
+      </div>
+    </div>
+
+    <!-- Sync + Sign Out -->
+    <div style="margin:8px 12px;display:flex;flex-direction:column;gap:8px">
+      <button class="d-btn" style="background:#EFF9FF;color:#0369A1;font-size:13px" onclick="syncWithOffice()">🔄 Sync with Office App</button>
+      <button class="d-btn d-btn-ghost" onclick="signOut()">Sign Out</button>
+    </div>
+  </div>`;
+}
+
+
+// ════════════════════════════════════════════════════════════
+// TOOLS SCREEN — Weather · Fuel Finder · Chat · Reminders · Me
+// ════════════════════════════════════════════════════════════
+function renderTools(){
+  if(!dApp.toolTab) dApp.toolTab = 'weather';
+  const tabs = [
+    {id:'weather',  icon:'🌦', label:'Weather'},
+    {id:'fuel',     icon:'⛽', label:'Fuel'},
+    {id:'chat',     icon:'💬', label:'Chat'},
+    {id:'reminders',icon:'🔔', label:'Alerts'},
+    {id:'me',       icon:'👤', label:'Profile'},
+  ];
+  const pills = `<div class="d-tool-pills">
+    ${tabs.map(t=>`<button class="d-tool-pill ${dApp.toolTab===t.id?'active':''}"
+      onclick="dApp.toolTab='${t.id}';showScreen('tools')">${t.icon} ${t.label}</button>`).join('')}
+  </div>`;
+
+  let content = '';
+  if(dApp.toolTab==='weather')   content = renderWeather();
+  if(dApp.toolTab==='fuel')      content = renderFuelFinder();
+  if(dApp.toolTab==='chat')      content = renderChat();
+  if(dApp.toolTab==='reminders') content = renderReminders();
+  if(dApp.toolTab==='me')        content = renderMeContent();
+
+  return `<div style="padding:4px 0 16px">${pills}${content}</div>`;
+}
+
+// ── #16 WEATHER ───────────────────────────────────────────────
+function renderWeather(){
+  const al = activeLoad();
+  const loc = al ? (al.dest||'Atlanta, GA') : 'Atlanta, GA';
+  const city = loc.split(',')[0];
+
+  // Simulated weather for current location and route cities
+  // In production: replace with openweathermap.org free API call
+  // API: https://api.openweathermap.org/data/2.5/weather?q={city}&appid={key}&units=imperial
+  const weather = dApp.weatherCache || generateWeatherData(loc, al);
+
+  const iconMap = {
+    'Clear':'☀️','Sunny':'☀️','Partly Cloudy':'⛅','Cloudy':'☁️',
+    'Rain':'🌧','Heavy Rain':'⛈','Thunderstorm':'⛈','Snow':'🌨',
+    'Fog':'🌫','Windy':'💨','Sleet':'🌧','Drizzle':'🌦'
+  };
+  const condIcon = iconMap[weather.current.condition] || '🌤';
+  const alertColor = weather.alerts.length > 0 ? '#C0321A' : '#2D7D0A';
+
+  return `
+    <!-- Current conditions hero -->
+    <div class="d-weather-hero">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px">
+            ${weather.current.location}
+          </div>
+          <div class="d-weather-temp">${weather.current.temp}°</div>
+          <div style="font-size:16px;color:rgba(255,255,255,.8);margin-top:4px">${weather.current.condition}</div>
+          <div style="font-size:12px;color:rgba(255,255,255,.5);margin-top:4px">
+            Feels ${weather.current.feelsLike}° · H:${weather.current.high}° L:${weather.current.low}°
+          </div>
+          <div style="font-size:12px;color:rgba(255,255,255,.5);margin-top:2px">
+            💨 ${weather.current.wind} mph · 💧 ${weather.current.humidity}%
+          </div>
+        </div>
+        <div style="font-size:70px;line-height:1">${condIcon}</div>
+      </div>
+      <button onclick="refreshWeather()" style="margin-top:14px;background:rgba(255,255,255,.1);color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font)">
+        ⟳ Refresh
+      </button>
+    </div>
+
+    <!-- Weather alerts -->
+    ${weather.alerts.length > 0 ? weather.alerts.map(a=>`
+      <div class="d-weather-alert">
+        <span style="font-size:22px">⚠️</span>
+        <div>
+          <div style="font-size:13px;font-weight:700;color:#854D0E">${a.title}</div>
+          <div style="font-size:12px;color:#92400E;margin-top:2px">${a.detail}</div>
+        </div>
+      </div>`).join('') : ''}
+
+    <!-- 5-day forecast -->
+    <div class="d-section">5-Day Forecast</div>
+    <div class="d-weather-row">
+      ${weather.forecast.map(d=>`
+        <div class="d-weather-day">
+          <div style="font-size:10px;font-weight:700;color:var(--c-text3)">${d.day}</div>
+          <div style="font-size:22px;margin:6px 0">${iconMap[d.condition]||'🌤'}</div>
+          <div style="font-size:13px;font-weight:700">${d.high}°</div>
+          <div style="font-size:11px;color:var(--c-text3)">${d.low}°</div>
+          ${d.precip?`<div style="font-size:9px;color:#0284C7;margin-top:2px">💧${d.precip}%</div>`:''}
+        </div>`).join('')}
+    </div>
+
+    <!-- Route weather if active load -->
+    ${al ? `
+    <div class="d-section">Route Weather</div>
+    <div class="d-card">
+      <div style="padding:0 14px">
+        ${[{city:(al.origin||'').split(',')[0],label:'📍 Pickup'},
+           {city:(al.dest||'').split(',')[0],  label:'🏁 Delivery'}].map(stop=>{
+          const w = generateCityWeather(stop.city);
+          return `<div class="d-list-item">
+            <div style="font-size:22px">${iconMap[w.condition]||'🌤'}</div>
+            <div style="flex:1">
+              <div style="font-size:13px;font-weight:700">${stop.label} — ${stop.city}</div>
+              <div style="font-size:12px;color:var(--c-text3)">${w.condition} · ${w.temp}°F · Wind ${w.wind}mph</div>
+            </div>
+          </div>`;}).join('')}
+      </div>
+    </div>` : ''}`;
+}
+
+function generateWeatherData(loc, load){
+  // Realistic weather simulation based on location/season
+  const city = (loc||'Atlanta').split(',')[0];
+  const month = new Date().getMonth();
+  const isSummer = month >= 5 && month <= 8;
+  const isWinter = month <= 1 || month === 11;
+  const baseTemp = isSummer ? 85 : isWinter ? 42 : 65;
+  const conditions = isSummer
+    ? ['Sunny','Partly Cloudy','Thunderstorm','Clear','Humid','Partly Cloudy']
+    : isWinter
+    ? ['Cloudy','Partly Cloudy','Clear','Rain','Foggy','Windy']
+    : ['Clear','Partly Cloudy','Sunny','Windy','Cloudy'];
+  const cond = conditions[Math.floor(Math.random()*conditions.length)];
+  const temp = baseTemp + Math.round((Math.random()-0.5)*20);
+  const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const today = new Date().getDay();
+  const data = {
+    current:{
+      location: city,
+      temp, feelsLike: temp-3, high: temp+8, low: temp-10,
+      condition: cond, wind: 5+Math.round(Math.random()*20),
+      humidity: 40+Math.round(Math.random()*40),
+    },
+    forecast: Array.from({length:5},(_,i)=>({
+      day: days[(today+i+1)%7],
+      condition: conditions[Math.floor(Math.random()*conditions.length)],
+      high: temp+Math.round((Math.random()-0.3)*15),
+      low:  temp-10+Math.round((Math.random()-0.5)*10),
+      precip: Math.random()>.6?Math.round(Math.random()*80):0,
+    })),
+    alerts: isSummer && Math.random()>.6
+      ? [{title:'Heat Advisory',detail:'High temps expected 95-100°F. Stay hydrated. Limit physical activity 10AM-6PM.'}]
+      : isWinter && Math.random()>.7
+      ? [{title:'Winter Weather Advisory',detail:'Possible ice on bridges and overpasses. Reduce speed, increase following distance.'}]
+      : [],
+  };
+  dApp.weatherCache = data;
+  dApp.weatherLoc   = loc;
+  return data;
+}
+
+function generateCityWeather(city){
+  const month = new Date().getMonth();
+  const isSummer = month >= 5 && month <= 8;
+  const temp = (isSummer?82:48)+Math.round((Math.random()-0.5)*20);
+  const conds = isSummer?['Sunny','Partly Cloudy','Thunderstorm']:['Cloudy','Rain','Partly Cloudy'];
+  return {temp, condition:conds[Math.floor(Math.random()*conds.length)], wind:5+Math.round(Math.random()*20)};
+}
+
+function refreshWeather(){
+  dApp.weatherCache = null;
+  showScreen('tools');
+  toast('🌦 Weather refreshed');
+}
+
+// ── #17 FUEL FINDER ───────────────────────────────────────────
+function renderFuelFinder(){
+  if(!dApp.fuelSearchCity) dApp.fuelSearchCity = '';
+  if(!dApp.fuelStops)      dApp.fuelStops      = null;
+
+  const al = activeLoad();
+  const nearCity = dApp.fuelSearchCity || (al?(al.dest||'').split(',')[0]:'Atlanta');
+
+  if(!dApp.fuelStops) dApp.fuelStops = generateFuelStops(nearCity);
+  const stops = dApp.fuelStops;
+
+  const cheapest = stops.reduce((a,b)=>a.diesel<b.diesel?a:b);
+  const networkStops = stops.filter(s=>s.network);
+
+  return `
+    <!-- Search bar -->
+    <div style="margin:10px 12px">
+      <div style="display:flex;gap:8px">
+        <input id="d-fuel-city" value="${dApp.fuelSearchCity}"
+          placeholder="City or ZIP (e.g. Charlotte, NC)"
+          style="flex:1;padding:12px 14px;border:1.5px solid #E2E8F0;border-radius:var(--r2);font-size:14px;font-family:var(--font);outline:none"
+          onfocus="this.style.borderColor='#0284C7'" onblur="this.style.borderColor='#E2E8F0'"/>
+        <button onclick="searchFuelStops()" class="d-btn d-btn-primary" style="width:auto;padding:12px 16px">🔍</button>
+      </div>
+      <div style="font-size:11px;color:var(--c-text3);margin-top:6px">Showing fuel stops near <strong>${nearCity}</strong></div>
+    </div>
+
+    <!-- Summary strip -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:0 12px 4px">
+      <div class="d-kpi"><div class="d-kpi-label">Cheapest</div><div class="d-kpi-val" style="font-size:20px;color:#2D7D0A">$${cheapest.diesel.toFixed(3)}</div></div>
+      <div class="d-kpi"><div class="d-kpi-label">Stops Found</div><div class="d-kpi-val" style="font-size:20px">${stops.length}</div></div>
+      <div class="d-kpi"><div class="d-kpi-label">In-Network</div><div class="d-kpi-val" style="font-size:20px;color:#0284C7">${networkStops.length}</div></div>
+    </div>
+
+    <!-- Fuel stop list -->
+    <div class="d-section">Nearby Fuel Stops — Diesel Price</div>
+    ${stops.sort((a,b)=>a.diesel-b.diesel).map((s,i)=>`
+    <div class="d-fuel-stop">
+      <div style="font-size:24px">${s.brand==='Pilot'?'✈️':s.brand==="Love's"?'❤️':s.brand==='TA'?'🚏':s.brand==='Flying J'?'✈️':s.brand==='Petro'?'🛢':s.brand==='Speedco'?'⚡':'⛽'}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:14px;font-weight:700">${s.brand} ${s.number} ${i===0?'<span style="font-size:9px;background:#DCFCE7;color:#166534;padding:1px 6px;border-radius:99px;font-weight:700">CHEAPEST</span>':''}</div>
+        <div style="font-size:12px;color:var(--c-text3);margin-top:2px">${s.address}</div>
+        <div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap">
+          ${s.network?`<span class="d-fuel-badge d-fuel-network">EFS/WEX</span>`:''}
+          ${s.hasScale?`<span class="d-fuel-badge" style="background:#F3E8FF;color:#7E22CE">⚖ Scale</span>`:''}
+          ${s.hasShower?`<span class="d-fuel-badge" style="background:#FEF9C3;color:#854D0E">🚿 Showers</span>`:''}
+          ${s.hasRestaurant?`<span class="d-fuel-badge" style="background:#FEE2E2;color:#991B1B">🍽 Food</span>`:''}
+          <span style="font-size:10px;color:var(--c-text3)">${s.distance} mi away</span>
+        </div>
+      </div>
+      <div style="text-align:right;flex-shrink:0">
+        <div class="d-fuel-price">$${s.diesel.toFixed(3)}</div>
+        <div style="font-size:9px;color:var(--c-text3);margin-top:2px">Diesel/gal</div>
+        <a href="https://maps.google.com/maps?daddr=${encodeURIComponent(s.address)}" target="_blank"
+          style="display:block;margin-top:6px;background:#EFF9FF;color:#0369A1;text-decoration:none;border-radius:6px;padding:4px 8px;font-size:10px;font-weight:700;text-align:center">
+          🗺 Nav
+        </a>
+      </div>
+    </div>`).join('')}
+
+    <div style="margin:12px;text-align:center;font-size:11px;color:var(--c-text3)">
+      Prices are estimates. Verify at pump. Updated: ${new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})}
+      <br><button onclick="dApp.fuelStops=null;showScreen('tools')" style="background:none;border:none;color:#0284C7;font-size:11px;cursor:pointer;margin-top:4px">⟳ Refresh prices</button>
+    </div>`;
+}
+
+function generateFuelStops(city){
+  const brands = [
+    {name:'Pilot',         num:'#0441', network:true,  scale:true,  shower:true,  rest:true},
+    {name:"Love's",        num:'#1122', network:true,  scale:true,  shower:true,  rest:true},
+    {name:'TA',            num:'#0882', network:true,  scale:false, shower:true,  rest:true},
+    {name:'Flying J',      num:'#2234', network:true,  scale:false, shower:true,  rest:false},
+    {name:'Petro',         num:'#0442', network:true,  scale:true,  shower:true,  rest:true},
+    {name:'Speedco',       num:'#0211', network:true,  scale:false, shower:false, rest:false},
+    {name:'Pilot',         num:'#0771', network:true,  scale:false, shower:true,  rest:true},
+    {name:"Love's",        num:'#0934', network:true,  scale:true,  shower:true,  rest:false},
+    {name:'BP Fleet',      num:'#8821', network:false, scale:false, shower:false, rest:false},
+    {name:'Shell TruckStop',num:'#3312',network:false, scale:false, shower:false, rest:false},
+  ];
+  const basePrice = 3.60 + Math.random()*0.60;
+  return brands.map((b,i)=>({
+    brand:       b.name,
+    number:      b.num,
+    address:     `Exit ${Math.floor(Math.random()*200)+1} I-${[75,85,20,40,95][i%5]}, ${city}`,
+    distance:    parseFloat((0.5+Math.random()*18).toFixed(1)),
+    diesel:      parseFloat((basePrice + (Math.random()-0.5)*0.35).toFixed(3)),
+    network:     b.network,
+    hasScale:    b.scale,
+    hasShower:   b.shower,
+    hasRestaurant:b.rest,
+  })).sort(()=>Math.random()-0.5);
+}
+
+function searchFuelStops(){
+  const city = document.getElementById('d-fuel-city')?.value?.trim();
+  if(!city){ toast('Enter a city to search'); return; }
+  dApp.fuelSearchCity = city;
+  dApp.fuelStops = null;
+  showScreen('tools');
+  toast('⛽ Finding fuel stops near '+city+'...');
+}
+
+// ── #18 TWO-WAY CHAT WITH DISPATCH ────────────────────────────
+function renderChat(){
+  if(!dApp.chatMessages) dApp.chatMessages = [];
+  const msgs = dApp.chatMessages;
+
+  return `
+    <div style="display:flex;flex-direction:column;height:calc(100dvh - 200px)">
+      <!-- Messages -->
+      <div style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch" id="d-chat-scroll">
+        ${msgs.length===0?`
+          <div style="text-align:center;padding:40px 20px;color:var(--c-text3)">
+            <div style="font-size:40px;margin-bottom:10px">💬</div>
+            <div style="font-size:15px;font-weight:700">No messages yet</div>
+            <div style="font-size:12px;margin-top:6px;line-height:1.5">Send a message to dispatch.<br>They'll receive it in the office app.</div>
+          </div>` : ''}
+        <div class="d-chat-messages">
+          ${msgs.map(m=>`
+            <div style="display:flex;flex-direction:column;align-items:${m.from==='driver'?'flex-end':'flex-start'}">
+              <div class="d-chat-bubble ${m.from==='driver'?'d-chat-mine':'d-chat-theirs'}">${m.text}</div>
+              <div class="d-chat-time" style="text-align:${m.from==='driver'?'right':'left'}">${m.time}</div>
+            </div>`).join('')}
+        </div>
+      </div>
+      <!-- Quick replies -->
+      <div style="padding:6px 12px;display:flex;gap:6px;overflow-x:auto;flex-shrink:0;-webkit-overflow-scrolling:touch">
+        ${['On my way 🚛','Running 30min late ⏱','At dock waiting 🏭','Load secured ✓','Delivered! ✅','Need fuel card help ⛽','Empty — where next? 📦'].map(q=>
+          `<button onclick="sendQuickChat('${q}')" style="flex-shrink:0;background:#fff;border:1px solid #E2E8F0;border-radius:99px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;color:var(--c-text2);white-space:nowrap">${q}</button>`
+        ).join('')}
+      </div>
+      <!-- Input bar -->
+      <div class="d-chat-input-bar">
+        <textarea id="d-chat-input" placeholder="Message dispatch..." rows="1"
+          style="flex:1;border:1.5px solid #E2E8F0;border-radius:18px;padding:10px 14px;font-family:var(--font);font-size:14px;outline:none;resize:none;max-height:80px;overflow-y:auto"
+          onfocus="this.style.borderColor='#0284C7'" onblur="this.style.borderColor='#E2E8F0'"
+          onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChatMessage();}"></textarea>
+        <button onclick="sendChatMessage()" class="d-btn d-btn-primary"
+          style="width:44px;height:44px;border-radius:50%;padding:0;flex-shrink:0;font-size:18px">↑</button>
+      </div>
+    </div>`;
+}
+
+function sendChatMessage(){
+  const inp = document.getElementById('d-chat-input');
+  const text = inp?.value?.trim();
+  if(!text) return;
+  if(!dApp.chatMessages) dApp.chatMessages = [];
+  const msg = {
+    id: Date.now(),
+    from: 'driver',
+    text,
+    time: new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}),
+    driverId: dApp.driverId,
+    driverName: me().name,
+  };
+  dApp.chatMessages.push(msg);
+  saveData();
+  // Write to shared localStorage so office app can read it
+  try {
+    const key = 'parchies-driver-chat-'+dApp.driverId;
+    const existing = JSON.parse(localStorage.getItem(key)||'[]');
+    existing.push(msg);
+    localStorage.setItem(key, JSON.stringify(existing.slice(-100)));
+  } catch(e){}
+  // BroadcastChannel to office app
+  if('BroadcastChannel' in window){
+    const bc = new BroadcastChannel('parchies-chat');
+    bc.postMessage({type:'driver-message', msg});
+    bc.close();
+  }
+  if(inp) inp.value='';
+  showScreen('tools');
+  // Auto-scroll to bottom
+  setTimeout(()=>{
+    const scroll = document.getElementById('d-chat-scroll');
+    if(scroll) scroll.scrollTop = scroll.scrollHeight;
+  }, 100);
+  toast('✅ Message sent to dispatch');
+}
+
+function sendQuickChat(text){
+  if(!dApp.chatMessages) dApp.chatMessages = [];
+  const msg = {
+    id: Date.now(), from:'driver', text,
+    time: new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}),
+    driverId: dApp.driverId, driverName: me().name,
+  };
+  dApp.chatMessages.push(msg);
+  saveData();
+  try {
+    const key='parchies-driver-chat-'+dApp.driverId;
+    const ex=JSON.parse(localStorage.getItem(key)||'[]');
+    ex.push(msg); localStorage.setItem(key,JSON.stringify(ex.slice(-100)));
+  } catch(e){}
+  if('BroadcastChannel' in window){
+    const bc=new BroadcastChannel('parchies-chat');
+    bc.postMessage({type:'driver-message',msg}); bc.close();
+  }
+  showScreen('tools');
+  toast('✅ Sent: "'+text+'"');
+}
+
+// Poll for dispatch replies
+function pollForChatReplies(){
+  if(!dApp.driverId) return;
+  try {
+    const key = 'parchies-dispatch-chat-'+dApp.driverId;
+    const replies = JSON.parse(localStorage.getItem(key)||'[]');
+    if(!dApp.chatMessages) dApp.chatMessages = [];
+    const existingIds = new Set(dApp.chatMessages.map(m=>m.id));
+    const newReplies = replies.filter(r=>!existingIds.has(r.id));
+    if(newReplies.length > 0){
+      newReplies.forEach(r => dApp.chatMessages.push(r));
+      saveData();
+      triggerNotification('💬 Dispatch replied', newReplies[newReplies.length-1].text.slice(0,60), {type:'message'});
+      if(dApp.toolTab==='chat') showScreen('tools');
+    }
+  } catch(e){}
+}
+
+// ── #19 DRUG TEST & CDL REMINDERS ────────────────────────────
+function renderReminders(){
+  const d = me();
+  const cdlDays = daysUntil(d.cdlExpiry);
+  const medDays = daysUntil(d.medExpiry||d.medCardExpiry);
+  const now = new Date();
+
+  // Build all reminders
+  const reminders = [];
+
+  // CDL Expiry
+  if(d.cdlExpiry){
+    const urgent = cdlDays !== null && cdlDays <= 30;
+    const warning= cdlDays !== null && cdlDays <= 90;
+    reminders.push({
+      icon:'📋', title:'CDL Renewal',
+      detail:`CDL expires ${fmtDate(d.cdlExpiry)}${cdlDays!==null?' ('+cdlDays+' days)':''}`,
+      sub: urgent?'⚠️ RENEW IMMEDIATELY — contact DMV today'
+           :warning?'Schedule CDL renewal — allow 2-3 weeks'
+           :'CDL current — no action needed',
+      color: urgent?'#C0321A':warning?'#B45309':'#2D7D0A',
+      barColor: urgent?'#C0321A':warning?'#F59E0B':'#2D7D0A',
+      urgent,
+      action: urgent||warning ? `<a href="tel:8005554636" style="display:block;margin-top:8px;background:#0284C7;color:#fff;text-decoration:none;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:700;text-align:center">📞 Call DMV</a>` : '',
+    });
+  }
+
+  // Medical Certificate
+  if(d.medExpiry||d.medCardExpiry){
+    const exp = d.medExpiry||d.medCardExpiry;
+    const days = daysUntil(exp);
+    const urgent = days!==null&&days<=30;
+    const warning= days!==null&&days<=60;
+    reminders.push({
+      icon:'🏥', title:'DOT Medical Certificate',
+      detail:`Med cert expires ${fmtDate(exp)}${days!==null?' ('+days+' days)':''}`,
+      sub: urgent?'⚠️ EXPIRED or EXPIRING — schedule physical immediately'
+           :warning?'Schedule DOT physical soon — requires 4-6 weeks'
+           :'Medical certificate current',
+      color: urgent?'#C0321A':warning?'#B45309':'#2D7D0A',
+      barColor: urgent?'#C0321A':warning?'#F59E0B':'#2D7D0A',
+      urgent,
+      action: urgent||warning ? `<button onclick="findDOTPhysician()" style="margin-top:8px;background:#0284C7;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font)">🔍 Find DOT Physician</button>` : '',
+    });
+  }
+
+  // Random drug test (simulated schedule)
+  const nextDrugTest = d.nextDrugTest;
+  if(nextDrugTest){
+    const days = daysUntil(nextDrugTest);
+    const urgent = days!==null&&days<=7;
+    reminders.push({
+      icon:'🧪', title:'Random Drug Test',
+      detail:`Next scheduled: ${fmtDate(nextDrugTest)}${days!==null?' ('+days+' days)':''}`,
+      sub: urgent?'⚠️ Drug test due this week — contact HR'
+           :'Random pool — you may be selected at any time',
+      color: urgent?'#C0321A':'#0284C7',
+      barColor: urgent?'#C0321A':'#0284C7',
+      urgent,
+      action: urgent ? `<a href="tel:8005558765" style="display:block;margin-top:8px;background:#0284C7;color:#fff;text-decoration:none;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:700;text-align:center">📞 Call HR</a>` : '',
+    });
+  }
+
+  // Annual driving record review
+  const hireDate = d.hireDate ? new Date(d.hireDate+'T00:00:00') : null;
+  if(hireDate){
+    const anniversary = new Date(now.getFullYear(), hireDate.getMonth(), hireDate.getDate());
+    if(anniversary < now) anniversary.setFullYear(now.getFullYear()+1);
+    const aDays = Math.ceil((anniversary-now)/(1000*60*60*24));
+    reminders.push({
+      icon:'📅', title:'Annual Record Review',
+      detail:`Next review: ${anniversary.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})} (${aDays}d)`,
+      sub:'DOT requires annual review of driving record and violations',
+      color:'#0284C7', barColor:'#0284C7', urgent:aDays<=30,
+      action:'',
+    });
+  }
+
+  // Hazmat (if applicable)
+  if(d.hazmat==='Yes'&&d.hazmatExpiry){
+    const days=daysUntil(d.hazmatExpiry);
+    const urgent=days!==null&&days<=60;
+    reminders.push({
+      icon:'☢️', title:'HAZMAT Endorsement',
+      detail:`Expires ${fmtDate(d.hazmatExpiry)}${days!==null?' ('+days+' days)':''}`,
+      sub:urgent?'⚠️ Schedule HAZMAT renewal — TSA clearance takes 4-8 weeks':'HAZMAT endorsement current',
+      color:urgent?'#C0321A':'#2D7D0A', barColor:urgent?'#C0321A':'#2D7D0A', urgent,
+      action:'',
+    });
+  }
+
+  // TWIC card
+  if(d.twicExpiry){
+    const days=daysUntil(d.twicExpiry);
+    const urgent=days!==null&&days<=90;
+    reminders.push({
+      icon:'🪪', title:'TWIC Card',
+      detail:`Expires ${fmtDate(d.twicExpiry)}${days!==null?' ('+days+' days)':''}`,
+      sub:urgent?'Schedule TWIC renewal — TSA enrollment takes 6-8 weeks':'TWIC card current',
+      color:urgent?'#B45309':'#2D7D0A', barColor:urgent?'#F59E0B':'#2D7D0A', urgent,
+      action:'',
+    });
+  }
+
+  // Sort: urgent first
+  reminders.sort((a,b)=>(b.urgent?1:0)-(a.urgent?1:0));
+
+  return `
+    ${reminders.length===0?`<div style="text-align:center;padding:40px 20px;color:var(--c-text3)">
+      <div style="font-size:40px;margin-bottom:10px">✅</div>
+      <div style="font-size:15px;font-weight:700">All documents current</div>
+      <div style="font-size:12px;margin-top:6px">No upcoming renewals or tests due</div>
+    </div>`:reminders.map(r=>`
+      <div class="d-remind-item">
+        <div class="d-remind-bar" style="background:${r.barColor}"></div>
+        <div class="d-remind-body">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+            <span style="font-size:22px">${r.icon}</span>
+            <div style="flex:1">
+              <div style="font-size:14px;font-weight:800;color:${r.color}">${r.title}</div>
+              <div style="font-size:12px;color:var(--c-text2);margin-top:2px">${r.detail}</div>
+            </div>
+          </div>
+          <div style="font-size:12px;color:${r.urgent?r.color:'var(--c-text3)'};padding:8px;background:${r.urgent?r.color+'18':'#F8FAFC'};border-radius:6px">${r.sub}</div>
+          ${r.action}
+        </div>
+      </div>`).join('')}
+
+    <!-- HOS Summary -->
+    <div class="d-section">Hours of Service</div>
+    ${(()=>{
+      const hos=(DB.hos||[]).find(h=>h.driverId===dApp.driverId);
+      if(!hos) return '<div class="d-card"><div class="d-card-body" style="text-align:center;color:var(--c-text3);font-size:13px">No HOS data — connect ELD</div></div>';
+      const used=hos.cycleUsed||0; const avail=hos.cycleAvail||0;
+      const pct=Math.round(used/(used+avail)*100);
+      const color=pct<70?'#2D7D0A':pct<90?'#B45309':'#C0321A';
+      return `<div class="d-card"><div class="d-card-body">
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:13px">
+          <span style="color:var(--c-text3)">70-Hour / 8-Day Cycle</span>
+          <span style="font-weight:700;color:${color}">${used}h used of 70h</span>
+        </div>
+        <div class="d-hos-bar"><div class="d-hos-fill" style="width:${pct}%;background:${color}"></div></div>
+        <div style="display:flex;justify-content:space-between;margin-top:8px;font-size:11px;color:var(--c-text3)">
+          <span>Drive remaining today: <strong style="color:${color}">${hos.driveRemaining||'11:00'}</strong></span>
+          <span>Status: ${hos.status||'Off Duty'}</span>
+        </div>
+      </div></div>`;
+    })()}`;
+}
+
+function findDOTPhysician(){
+  const city = me().city||'Atlanta';
+  window.open('https://www.google.com/maps/search/DOT+physical+exam+near+'+encodeURIComponent(city), '_blank');
+}
+
+// ── PROFILE (moved from Me tab) ────────────────────────────────
+function renderMeContent(){
+  return renderMe().replace('<div style="padding:4px 0 16px">','').replace(/`;\s*}$/,'');
+}
+
+
+
+// ── Manual sync with office ────────────────────────────────────
+function syncWithOffice(){
+  toast('🔄 Syncing with office...');
+  loadData();
+  updateTopbar();
+  showScreen(dApp.screen||'home');
+  toast('✅ Synced with office app');
+}
+
+// ─── ACTIONS ─────────────────────────────────────────────────
+function setStatus(status){
+  const d=me();
+  if(d) d.dispatchStatus=status;
+  saveData();
+  updateTopbar();
+  showScreen(dApp.screen);
+  toast('Status updated: '+status);
+}
+
+function markDelivered(loadId){
+  const load=DB.loads.find(l=>l.id===loadId);
+  if(!load) return;
+  load.status='Delivered';
+  load.actualDeliveryTime=new Date().toISOString();
+  load.podStatus='Pending';
+  saveData();
+  toast('✅ Load '+loadId+' marked Delivered!');
+  showScreen('home');
+}
+
+function reportDetention(loadId){
+  const msg=prompt('How long at shipper/receiver? (e.g. "2h 30m")');
+  if(msg) toast('Detention reported: '+msg+' — notify dispatch');
+}
+
+function toggleCheck(itemId){
+  if(!DB.driverChecklist) DB.driverChecklist={};
+  if(!DB.driverChecklist[dApp.driverId]) DB.driverChecklist[dApp.driverId]=[];
+  const list=DB.driverChecklist[dApp.driverId];
+  const item=list.find(i=>i.id===itemId);
+  if(item) item.done=!item.done;
+  saveData();
+  showScreen('load');
+}
+
+function toggleDVIR(itemId){
+  dApp.dvirChecks[itemId]=!dApp.dvirChecks[itemId];
+  showScreen('dvir');
+}
+
+function submitDVIR(type){
+  const d=me();
+  const checks=dApp.dvirChecks;
+  const allChecked=Object.values(checks).filter(v=>v).length;
+  const notes=document.getElementById('d-dvir-notes')?.value||'';
+  const defects=notes?[notes]:[];
+  const record={
+    id:'DVIR-'+Date.now(),
+    date:new Date().toISOString().slice(0,10),
+    driverId:dApp.driverId,
+    unit:d.tractor||'Unknown',
+    type:type==='pre'?'Pre-trip':'Post-trip',
+    odometer:'—',
+    result:defects.length?'Defects Found':'Satisfactory',
+    defects,
+    signedOff:true,
+    notes,
+  };
+  if(!DB.dvirRecords) DB.dvirRecords=[];
+  DB.dvirRecords.unshift(record);
+  dApp.dvirChecks={};
+  saveData();
+  toast('✅ DVIR Submitted — '+record.result);
+  showScreen('dvir');
+}
+
+function signOut(){
+  if(!confirm('Sign out?')) return;
+  dApp.driverId=null;
+  document.getElementById('d-login').style.display='flex';
+  document.getElementById('d-main').style.display='none';
+  document.getElementById('d-driver-select').value='';
+  document.getElementById('d-pin').value='';
+}
+
+function showLoadDetail(loadId){
+  const l=DB.loads.find(x=>x.id===loadId);
+  if(!l) return;
+  alert(l.id+'\n'+l.origin+' → '+l.dest+'\n'+fmtNum(l.miles)+' mi · '+fmtUSD(l.gross)+' gross\nMy Pay: '+fmtUSD(myPay(l))+'\nStatus: '+l.status+'\nBOL: '+(l.bolNumber||'—'));
+}
+
+// Init
+loadData();
+
+
+// ════════════════════════════════════════════════════════════
+// #1 — PHOTO CAPTURE
+// ════════════════════════════════════════════════════════════
+if(!dApp.photos)    dApp.photos    = {};
+if(!dApp.photoTag)  dApp.photoTag  = 'BOL';
+if(!dApp.signatures)dApp.signatures= {};
+
+function capturePhoto(event, loadId){
+  const file = event.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    if(!dApp.photos[loadId]) dApp.photos[loadId] = [];
+    // Compress image before storing
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const MAX = 800;
+      let w = img.width, h = img.height;
+      if(w > MAX){ h = Math.round(h * MAX/w); w = MAX; }
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      const compressed = canvas.toDataURL('image/jpeg', 0.7);
+      dApp.photos[loadId].push({
+        data: compressed,
+        tag:  dApp.photoTag,
+        time: new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}),
+        date: new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'}),
+        loadId,
+      });
+      saveData();
+      toast('📷 ' + dApp.photoTag + ' photo saved');
+      showScreen('load');
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+  event.target.value = ''; // reset input so same file can be re-selected
+}
+
+function deletePhoto(idx, loadId){
+  if(!confirm('Delete this photo?')) return;
+  dApp.photos[loadId].splice(idx, 1);
+  saveData();
+  showScreen('load');
+}
+
+function viewPhoto(idx, loadId){
+  const p = (dApp.photos[loadId]||[])[idx];
+  if(!p) return;
+  // Show full-screen photo modal
+  const existing = document.getElementById('d-photo-modal');
+  if(existing) existing.remove();
+  const modal = document.createElement('div');
+  modal.className = 'd-photo-modal';
+  modal.id = 'd-photo-modal';
+  modal.innerHTML = `
+    <div style="position:absolute;top:max(20px,env(safe-area-inset-top));right:20px">
+      <button onclick="document.getElementById('d-photo-modal').remove()"
+        style="background:rgba(255,255,255,.15);color:#fff;border:none;border-radius:50%;width:40px;height:40px;font-size:18px;cursor:pointer">✕</button>
+    </div>
+    <img src="${p.data}" style="max-width:96%;max-height:80vh;border-radius:10px"/>
+    <div style="color:rgba(255,255,255,.7);font-size:12px;margin-top:12px;text-align:center">
+      ${p.tag} · ${p.date} ${p.time} · Load ${loadId}
+    </div>
+    <button onclick="sharePhoto('${loadId}',${idx})"
+      style="margin-top:16px;background:#0284C7;color:#fff;border:none;border-radius:10px;padding:12px 28px;font-size:14px;font-weight:700;cursor:pointer">
+      📤 Share Photo
+    </button>`;
+  document.body.appendChild(modal);
+}
+
+function sharePhoto(loadId, idx){
+  const p = (dApp.photos[loadId]||[])[idx];
+  if(!p) return;
+  // Convert base64 to blob for sharing
+  const byteStr = atob(p.data.split(',')[1]);
+  const arr = new Uint8Array(byteStr.length);
+  for(let i=0;i<byteStr.length;i++) arr[i]=byteStr.charCodeAt(i);
+  const blob = new Blob([arr], {type:'image/jpeg'});
+  const file = new File([blob], `${loadId}-${p.tag}-${p.date}.jpg`, {type:'image/jpeg'});
+  if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
+    navigator.share({
+      title: `${p.tag} — Load ${loadId}`,
+      text:  `${p.tag} photo for load ${loadId}. Captured ${p.date} ${p.time}.`,
+      files: [file],
+    }).catch(()=>{});
+  } else {
+    // Fallback: download the image
+    const link = document.createElement('a');
+    link.href = p.data;
+    link.download = `${loadId}-${p.tag}.jpg`;
+    link.click();
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+// #3 — ONE-TAP CHECK CALL
+// ════════════════════════════════════════════════════════════
+function buildCheckCallMsg(load){
+  const d = me();
+  const now = new Date();
+  const time = now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+  const origin = (load.origin||'').split(',')[0];
+  const dest   = (load.dest||'').split(',')[0];
+  return `CHECK CALL — ${time}\n${d.name} · ${d.tractor||'Unit'}\nLoad: ${load.id}\nRoute: ${origin} → ${dest}\nStatus: ${load.status}\nAll clear — on schedule\nNext check-in: 4 hours`;
+}
+
+function sendCheckCall(loadId, method){
+  const load = DB.loads.find(l=>l.id===loadId);
+  if(!load) return;
+  const msg = buildCheckCallMsg(load);
+  const dispatchPhone = DB.settings?.dispatchPhone || '7065550100';
+  const dispatchEmail = DB.settings?.dispatchEmail || 'parchiestruck@gmail.com';
+
+  if(method === 'sms'){
+    window.location.href = `sms:${dispatchPhone}?body=${encodeURIComponent(msg)}`;
+  } else {
+    const subject = `Check Call — ${me().name} — Load ${loadId}`;
+    window.location.href = `mailto:${dispatchEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(msg)}`;
+  }
+  // Log the check call
+  if(!dApp.checkCalls) dApp.checkCalls = {};
+  if(!dApp.checkCalls[loadId]) dApp.checkCalls[loadId] = [];
+  dApp.checkCalls[loadId].push({
+    time: new Date().toISOString(),
+    method,
+    msg,
+  });
+  saveData();
+  toast('✅ Check call sent via ' + (method==='sms'?'text':'email'));
+}
+
+// ════════════════════════════════════════════════════════════
+// #4 — ELECTRONIC SIGNATURE
+// ════════════════════════════════════════════════════════════
+let _sigDrawing = false;
+let _sigCtx     = null;
+let _sigCanvas  = null;
+let _sigHasData = false;
+
+function initSigCanvas(loadId){
+  const canvas = document.getElementById('d-sig-' + loadId);
+  if(!canvas || dApp.signatures[loadId]) return;
+
+  // Scale for device pixel ratio (sharp on retina)
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.getBoundingClientRect();
+  canvas.width  = rect.width  * dpr;
+  canvas.height = rect.height * dpr;
+  canvas.style.width  = rect.width  + 'px';
+  canvas.style.height = rect.height + 'px';
+
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  ctx.strokeStyle = '#0F172A';
+  ctx.lineWidth   = 2.5;
+  ctx.lineCap     = 'round';
+  ctx.lineJoin    = 'round';
+  _sigCanvas = canvas;
+  _sigCtx    = ctx;
+  _sigHasData = false;
+
+  function getPos(e){
+    const r = canvas.getBoundingClientRect();
+    const src = e.touches ? e.touches[0] : e;
+    return { x: src.clientX - r.left, y: src.clientY - r.top };
+  }
+
+  canvas.addEventListener('touchstart', e=>{
+    e.preventDefault();
+    _sigDrawing = true;
+    const p = getPos(e);
+    ctx.beginPath();
+    ctx.moveTo(p.x, p.y);
+  }, {passive:false});
+
+  canvas.addEventListener('touchmove', e=>{
+    e.preventDefault();
+    if(!_sigDrawing) return;
+    const p = getPos(e);
+    ctx.lineTo(p.x, p.y);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(p.x, p.y);
+    _sigHasData = true;
+  }, {passive:false});
+
+  canvas.addEventListener('touchend', e=>{
+    e.preventDefault();
+    _sigDrawing = false;
+    ctx.beginPath();
+  }, {passive:false});
+
+  // Mouse fallback for desktop testing
+  canvas.addEventListener('mousedown', e=>{
+    _sigDrawing = true;
+    const p = getPos(e);
+    ctx.beginPath(); ctx.moveTo(p.x, p.y);
+  });
+  canvas.addEventListener('mousemove', e=>{
+    if(!_sigDrawing) return;
+    const p = getPos(e);
+    ctx.lineTo(p.x, p.y); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(p.x, p.y);
+    _sigHasData = true;
+  });
+  canvas.addEventListener('mouseup',   ()=>{ _sigDrawing=false; ctx.beginPath(); });
+  canvas.addEventListener('mouseleave',()=>{ _sigDrawing=false; });
+}
+
+function clearCanvas(loadId){
+  const canvas = document.getElementById('d-sig-' + loadId);
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  _sigHasData = false;
+}
+
+function saveSignature(loadId){
+  const canvas = document.getElementById('d-sig-' + loadId);
+  if(!canvas){ toast('Signature canvas not found'); return; }
+  if(!_sigHasData){ toast('Please draw your signature first'); return; }
+
+  const d = me();
+  const now = new Date();
+  dApp.signatures[loadId] = {
+    data: canvas.toDataURL('image/png'),
+    name: d.name,
+    driverId: d.id,
+    loadId,
+    time: now.toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}),
+    timestamp: now.toISOString(),
+  };
+  saveData();
+  toast('✅ Signature saved for Load ' + loadId);
+  showScreen('load');
+}
+
+function clearSignature(loadId){
+  if(!confirm('Clear saved signature?')) return;
+  delete dApp.signatures[loadId];
+  saveData();
+  showScreen('load');
+  setTimeout(()=>initSigCanvas(loadId), 150);
+}
+
+
+// ════════════════════════════════════════════════════════════
+// DVIR MEDIA — Photo & Video per inspection item
+// ════════════════════════════════════════════════════════════
+
+function addDvirMedia(event, itemId, type){
+  const file = event.target.files[0];
+  if(!file){ return; }
+  if(!dApp.dvirMedia) dApp.dvirMedia = {};
+  if(!dApp.dvirMedia[itemId]) dApp.dvirMedia[itemId] = [];
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    if(type === 'photo'){
+      // Compress photo
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX = 900;
+        let w = img.width, h = img.height;
+        if(w > MAX){ h = Math.round(h*MAX/w); w = MAX; }
+        if(h > MAX){ w = Math.round(w*MAX/h); h = MAX; }
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        const compressed = canvas.toDataURL('image/jpeg', 0.75);
+        dApp.dvirMedia[itemId].push({
+          type: 'photo',
+          data: compressed,
+          itemId,
+          time: new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}),
+          date: new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'}),
+        });
+        saveData();
+        toast('📷 Photo added to ' + (itemId==='general'?'inspection':'item'));
+        showScreen('dvir');
+      };
+      img.src = e.target.result;
+    } else {
+      // Video — store as-is (already compressed by camera)
+      // Limit to 30MB to avoid storage issues
+      if(file.size > 30 * 1024 * 1024){
+        toast('⚠ Video too large — keep under 30MB (try shorter clip)');
+        return;
+      }
+      dApp.dvirMedia[itemId].push({
+        type: 'video',
+        data: e.target.result,
+        itemId,
+        duration: '—',
+        time: new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}),
+        date: new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'}),
+      });
+      saveData();
+      toast('🎥 Video recorded for ' + (itemId==='general'?'inspection':'item'));
+      showScreen('dvir');
+    }
+  };
+  reader.readAsDataURL(file);
+  event.target.value = '';
+}
+
+function deleteDvirMedia(itemId, idx){
+  if(!confirm('Delete this media?')) return;
+  if(dApp.dvirMedia[itemId]){
+    dApp.dvirMedia[itemId].splice(idx, 1);
+    saveData();
+    showScreen('dvir');
+  }
+}
+
+function viewDvirMedia(itemId, idx){
+  const m = (dApp.dvirMedia[itemId]||[])[idx];
+  if(!m) return;
+  const existing = document.getElementById('d-media-modal');
+  if(existing) existing.remove();
+
+  const modal = document.createElement('div');
+  modal.className = 'd-photo-modal';
+  modal.id = 'd-media-modal';
+
+  if(m.type === 'video'){
+    modal.innerHTML = `
+      <div style="position:absolute;top:max(20px,env(safe-area-inset-top));right:20px;z-index:1">
+        <button onclick="document.getElementById('d-media-modal').remove()"
+          style="background:rgba(255,255,255,.15);color:#fff;border:none;border-radius:50%;width:40px;height:40px;font-size:18px;cursor:pointer">✕</button>
+      </div>
+      <video src="${m.data}" controls autoplay playsinline
+        style="max-width:96%;max-height:75vh;border-radius:10px;background:#000"></video>
+      <div style="color:rgba(255,255,255,.7);font-size:12px;margin-top:10px;text-align:center">
+        🎥 Video · ${m.date} ${m.time}${itemId!=='general'?' · '+itemId:''}
+      </div>
+      <div style="display:flex;gap:10px;margin-top:14px">
+        <button onclick="shareDvirMedia('${itemId}',${idx})"
+          style="background:#0284C7;color:#fff;border:none;border-radius:10px;padding:11px 22px;font-size:13px;font-weight:700;cursor:pointer">
+          📤 Share
+        </button>
+        <button onclick="document.getElementById('d-media-modal').remove()"
+          style="background:rgba(255,255,255,.1);color:#fff;border:none;border-radius:10px;padding:11px 22px;font-size:13px;cursor:pointer">
+          Close
+        </button>
+      </div>`;
+  } else {
+    modal.innerHTML = `
+      <div style="position:absolute;top:max(20px,env(safe-area-inset-top));right:20px;z-index:1">
+        <button onclick="document.getElementById('d-media-modal').remove()"
+          style="background:rgba(255,255,255,.15);color:#fff;border:none;border-radius:50%;width:40px;height:40px;font-size:18px;cursor:pointer">✕</button>
+      </div>
+      <img src="${m.data}" style="max-width:96%;max-height:78vh;border-radius:10px"/>
+      <div style="color:rgba(255,255,255,.7);font-size:12px;margin-top:10px;text-align:center">
+        📷 ${m.date} ${m.time}${itemId!=='general'?' · '+itemId:''}
+      </div>
+      <div style="display:flex;gap:10px;margin-top:14px">
+        <button onclick="shareDvirMedia('${itemId}',${idx})"
+          style="background:#0284C7;color:#fff;border:none;border-radius:10px;padding:11px 22px;font-size:13px;font-weight:700;cursor:pointer">
+          📤 Share
+        </button>
+        <button onclick="document.getElementById('d-media-modal').remove()"
+          style="background:rgba(255,255,255,.1);color:#fff;border:none;border-radius:10px;padding:11px 22px;font-size:13px;cursor:pointer">
+          Close
+        </button>
+      </div>`;
+  }
+  document.body.appendChild(modal);
+}
+
+function shareDvirMedia(itemId, idx){
+  const m = (dApp.dvirMedia[itemId]||[])[idx];
+  if(!m) return;
+  const d = me();
+  const isVideo = m.type === 'video';
+  const mimeType = isVideo ? 'video/mp4' : 'image/jpeg';
+  const ext      = isVideo ? 'mp4' : 'jpg';
+  const fileName = `DVIR-${d.tractor||'unit'}-${itemId}-${m.date.replace(/ /g,'-')}.${ext}`;
+
+  const byteStr = atob(m.data.split(',')[1]);
+  const arr = new Uint8Array(byteStr.length);
+  for(let i=0;i<byteStr.length;i++) arr[i]=byteStr.charCodeAt(i);
+  const blob = new Blob([arr], {type: mimeType});
+  const file = new File([blob], fileName, {type: mimeType});
+
+  if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
+    navigator.share({
+      title: `DVIR ${dApp.dvirType==='pre'?'Pre':'Post'}-Trip — ${d.tractor||'Unit'}`,
+      text:  `DVIR inspection ${isVideo?'video':'photo'} — ${itemId} — ${m.date} ${m.time}`,
+      files: [file],
+    }).catch(()=>{});
+  } else {
+    const link = document.createElement('a');
+    link.href = m.data;
+    link.download = fileName;
+    link.click();
+  }
+}
+
+// Update submitDVIR to include media count
+const _origSubmitDVIR = submitDVIR;
+submitDVIR = function(type){
+  const d=me();
+  const notes=document.getElementById('d-dvir-notes')?.value||'';
+  const defects=notes?[notes]:[];
+  // Gather per-item notes that have content
+  const itemNotes=Object.entries(dApp.dvirNotes||{}).filter(([k,v])=>v).map(([k,v])=>k+': '+v);
+  const allDefects=[...defects,...itemNotes];
+  // Count total media attached
+  const mediaCount=Object.values(dApp.dvirMedia||{}).reduce((s,m)=>s+m.length,0);
+
+  const record={
+    id:'DVIR-'+Date.now(),
+    date:new Date().toISOString().slice(0,10),
+    driverId:dApp.driverId,
+    unit:d.tractor||'Unknown',
+    type:type==='pre'?'Pre-trip':'Post-trip',
+    odometer:'—',
+    result:allDefects.length?'Defects Found':'Satisfactory',
+    defects:allDefects,
+    signedOff:true,
+    notes,
+    mediaCount,
+    mediaSummary: Object.entries(dApp.dvirMedia||{})
+      .filter(([k,v])=>v.length>0)
+      .map(([k,v])=>k+':'+v.length+(v.some(m=>m.type==='video')?'(vid)':''))
+      .join(', '),
+  };
+  if(!DB.dvirRecords) DB.dvirRecords=[];
+  DB.dvirRecords.unshift(record);
+  // Clear DVIR state for next inspection
+  dApp.dvirChecks  = {};
+  dApp.dvirMedia   = {};
+  dApp.dvirNotes   = {};
+  dApp.dvirExpanded= {};
+  saveData();
+  toast('✅ DVIR Submitted — '+record.result+(mediaCount?' · '+mediaCount+' media files attached':''));
+  showScreen('dvir');
+};
+
+
+// ════════════════════════════════════════════════════════════
+// PUSH NOTIFICATION SYSTEM — Driver App
+// Uses Web Notifications API + localStorage polling
+// Works offline, no server needed
+// ════════════════════════════════════════════════════════════
+
+const NOTIF_STORAGE_KEY = 'parchies-driver-notifications';
+const LOAD_NOTIF_KEY    = 'parchies-load-assignments';  // written by office app
+let _notifPollInterval  = null;
+let _notifHistory       = [];
+let _unreadNotifs       = 0;
+
+// ── Request notification permission ──────────────────────────
+function requestNotifPermission(){
+  if(!('Notification' in window)) return Promise.resolve('denied');
+  if(Notification.permission === 'granted') return Promise.resolve('granted');
+  if(Notification.permission === 'denied')  return Promise.resolve('denied');
+  return Notification.requestPermission();
+}
+
+// ── Show an in-app banner (works without permission) ─────────
+function showNotifBanner(title, message, payload={}){
+  // Remove existing banner
+  const existing = document.getElementById('d-notif-banner');
+  if(existing) existing.remove();
+
+  const banner = document.createElement('div');
+  banner.className = 'd-notif-banner';
+  banner.id = 'd-notif-banner';
+
+  const icon = payload.type==='new-load'?'📦':
+               payload.type==='status'  ?'🚛':
+               payload.type==='message' ?'✉️' :'🔔';
+
+  banner.innerHTML = `
+    <div class="d-notif-icon">${icon}</div>
+    <div class="d-notif-body">
+      <div class="d-notif-title">${title}</div>
+      <div class="d-notif-msg">${message}</div>
+      ${payload.type==='new-load'?`
+      <div class="d-notif-actions">
+        <button class="d-notif-btn d-notif-view" onclick="viewNotifLoad('${payload.loadId}')">View Load</button>
+        <button class="d-notif-btn d-notif-dismiss" onclick="dismissNotifBanner()">Dismiss</button>
+      </div>`:`
+      <div class="d-notif-actions">
+        <button class="d-notif-btn d-notif-dismiss" onclick="dismissNotifBanner()">Dismiss</button>
+      </div>`}
+    </div>`;
+
+  document.body.appendChild(banner);
+  requestAnimationFrame(()=> banner.classList.add('show'));
+
+  // Auto-dismiss after 8 seconds unless it has action buttons
+  if(payload.type !== 'new-load'){
+    setTimeout(()=> dismissNotifBanner(), 8000);
+  }
+
+  // Vibrate on Android
+  if(navigator.vibrate) navigator.vibrate([200, 100, 200]);
+}
+
+function dismissNotifBanner(){
+  const b = document.getElementById('d-notif-banner');
+  if(b){ b.classList.remove('show'); setTimeout(()=>b.remove(), 350); }
+}
+
+function viewNotifLoad(loadId){
+  dismissNotifBanner();
+  // Reload fresh data then navigate to load screen
+  loadData();
+  showScreen('load');
+}
+
+// ── Native OS push notification ───────────────────────────────
+function sendNativeNotif(title, body, data={}){
+  if(!('Notification' in window)) return;
+  if(Notification.permission !== 'granted') return;
+  try {
+    const n = new Notification(title, {
+      body,
+      icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192"><rect width="192" height="192" fill="%230A1628" rx="32"/><text x="96" y="130" font-size="110" text-anchor="middle">🚛</text></svg>',
+      badge: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 72"><text y="60" font-size="60">🚛</text></svg>',
+      tag: data.loadId || 'parchies-notif',
+      requireInteraction: data.type === 'new-load',
+      silent: false,
+      data,
+    });
+    n.onclick = () => {
+      window.focus();
+      if(data.loadId) viewNotifLoad(data.loadId);
+      n.close();
+    };
+  } catch(e){
+  }
+}
+
+// ── Full notification trigger ─────────────────────────────────
+function triggerNotification(title, message, payload={}){
+  // Always show in-app banner
+  showNotifBanner(title, message, payload);
+  // Also native OS notification if permitted
+  sendNativeNotif(title, message, payload);
+  // Add to history
+  _notifHistory.unshift({
+    id: Date.now(),
+    title, message, payload,
+    time: new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}),
+    date: new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'}),
+    read: false,
+  });
+  _unreadNotifs++;
+  updateBellBadge();
+  saveNotifHistory();
+}
+
+function updateBellBadge(){
+  const badge = document.getElementById('d-bell-count');
+  if(!badge) return;
+  if(_unreadNotifs > 0){
+    badge.style.display = 'flex';
+    badge.textContent = _unreadNotifs > 9 ? '9+' : _unreadNotifs;
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+function saveNotifHistory(){
+  try {
+    localStorage.setItem(NOTIF_STORAGE_KEY, JSON.stringify(_notifHistory.slice(0,50)));
+  } catch(e){}
+}
+
+function loadNotifHistory(){
+  try {
+    const saved = localStorage.getItem(NOTIF_STORAGE_KEY);
+    if(saved){
+      _notifHistory = JSON.parse(saved);
+      _unreadNotifs = _notifHistory.filter(n=>!n.read).length;
+      updateBellBadge();
+    }
+  } catch(e){}
+}
+
+// ── Poll for new load assignments ─────────────────────────────
+// Office app writes to localStorage key when assigning a load
+// Driver app polls every 30s and shows notification
+let _lastLoadCheck = Date.now();
+
+function pollForNewLoads(){
+  if(!dApp.driverId) return;
+  try {
+    const raw = localStorage.getItem(LOAD_NOTIF_KEY);
+    if(!raw) return;
+    const assignments = JSON.parse(raw);
+    const myAssignments = (assignments[dApp.driverId]||[])
+      .filter(a => a.timestamp > _lastLoadCheck && !a.seen);
+
+    myAssignments.forEach(a => {
+      // Mark as seen
+      a.seen = true;
+      // Show notification
+      const load = DB.loads.find(l=>l.id===a.loadId) ||
+                   EMBEDDED_LOADS.find(l=>l.id===a.loadId) || {};
+      const origin = (load.origin||a.origin||'').split(',')[0];
+      const dest   = (load.dest  ||a.dest  ||'').split(',')[0];
+      const gross  = load.gross||a.gross||0;
+
+      triggerNotification(
+        '📦 New Load Assigned!',
+        `Load ${a.loadId}: ${origin} → ${dest}` +
+        (gross ? ` · $${gross.toLocaleString()}` : '') +
+        (a.pickupDate ? ` · Pickup ${a.pickupDate}` : ''),
+        { type:'new-load', loadId:a.loadId }
+      );
+
+      // Refresh DB to pick up the new load
+      loadData();
+      updateTopbar();
+    });
+
+    // Write back with seen flags
+    if(myAssignments.length > 0){
+      localStorage.setItem(LOAD_NOTIF_KEY, JSON.stringify(assignments));
+      _lastLoadCheck = Date.now();
+    }
+  } catch(e){}
+}
+
+// ── Also check for HOS warnings ───────────────────────────────
+function checkHOSAlerts(){
+  if(!dApp.driverId) return;
+  const hos = (DB.hos||[]).find(h=>h.driverId===dApp.driverId);
+  if(!hos) return;
+  const driveRemain = parseFloat(hos.driveRemaining||'11');
+  if(driveRemain <= 1 && driveRemain > 0){
+    // Only notify once per session
+    if(!dApp._hosAlerted){
+      dApp._hosAlerted = true;
+      triggerNotification(
+        '⚠️ HOS Warning',
+        `Only ${hos.driveRemaining} drive time remaining — find a safe stop soon`,
+        { type:'hos-warning' }
+      );
+    }
+  }
+}
+
+// ── Notification history screen ───────────────────────────────
+function openNotifHistory(){
+  // Mark all as read
+  _notifHistory.forEach(n=>n.read=true);
+  _unreadNotifs = 0;
+  updateBellBadge();
+  saveNotifHistory();
+
+  const existing = document.getElementById('d-notif-history-modal');
+  if(existing){ existing.remove(); return; }
+
+  const modal = document.createElement('div');
+  modal.id = 'd-notif-history-modal';
+  modal.style.cssText = `
+    position:fixed;inset:0;background:#EAECEF;z-index:500;overflow-y:auto;
+    padding:max(60px,env(safe-area-inset-top)+56px) 0 max(80px,env(safe-area-inset-bottom)+64px);
+    font-family:-apple-system,Inter,sans-serif;
+  `;
+  modal.innerHTML = `
+    <div style="background:#0A1628;color:#fff;padding:12px 16px;display:flex;align-items:center;gap:12px;position:fixed;top:0;left:0;right:0;z-index:501;padding-top:max(12px,env(safe-area-inset-top))">
+      <button onclick="document.getElementById('d-notif-history-modal').remove()"
+        style="background:none;border:none;color:#fff;font-size:20px;cursor:pointer;line-height:1">←</button>
+      <span style="font-size:16px;font-weight:800">Notifications</span>
+      ${_notifHistory.length>0?`<button onclick="clearNotifHistory()" style="margin-left:auto;background:none;border:none;color:rgba(255,255,255,.5);font-size:12px;cursor:pointer">Clear All</button>`:''}
+    </div>
+    <div style="padding:10px 12px">
+      ${_notifHistory.length===0
+        ?`<div style="text-align:center;padding:50px 20px;color:#94A3B8">
+            <div style="font-size:40px;margin-bottom:10px">🔔</div>
+            <div style="font-size:15px;font-weight:700">No notifications yet</div>
+            <div style="font-size:12px;margin-top:6px">New load assignments will appear here</div>
+          </div>`
+        :_notifHistory.map(n=>`
+          <div style="background:#fff;border-radius:12px;margin-bottom:8px;padding:14px;box-shadow:0 1px 4px rgba(0,0,0,.08);display:flex;gap:12px;align-items:flex-start">
+            <div style="font-size:22px">${n.payload?.type==='new-load'?'📦':n.payload?.type==='hos-warning'?'⚠️':'🔔'}</div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:13px;font-weight:700;margin-bottom:3px">${n.title}</div>
+              <div style="font-size:12px;color:#64748B;line-height:1.4">${n.message}</div>
+              <div style="font-size:10px;color:#94A3B8;margin-top:6px">${n.date} · ${n.time}</div>
+              ${n.payload?.loadId?`<button onclick="document.getElementById('d-notif-history-modal').remove();viewNotifLoad('${n.payload.loadId}')"
+                style="margin-top:8px;background:#EFF9FF;color:#0369A1;border:none;border-radius:6px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer">View Load →</button>`:''}
+            </div>
+          </div>`).join('')}
+    </div>`;
+  document.body.appendChild(modal);
+}
+
+function clearNotifHistory(){
+  _notifHistory = [];
+  _unreadNotifs = 0;
+  updateBellBadge();
+  saveNotifHistory();
+  const modal = document.getElementById('d-notif-history-modal');
+  if(modal) modal.remove();
+}
+
+// ── Permission request banner ─────────────────────────────────
+function showPermissionBanner(){
+  if(!('Notification' in window)) return;
+  if(Notification.permission !== 'default') return;
+  const existing = document.getElementById('d-perm-bar');
+  if(existing) return;
+
+  const bar = document.createElement('div');
+  bar.className = 'd-perm-bar';
+  bar.id = 'd-perm-bar';
+  bar.innerHTML = `
+    <span style="font-size:22px">🔔</span>
+    <div style="flex:1">
+      <div style="font-size:13px;font-weight:700">Enable notifications?</div>
+      <div style="font-size:11px;color:rgba(255,255,255,.6);margin-top:2px">Get alerts when new loads are assigned</div>
+    </div>
+    <button onclick="requestNotifPermission().then(p=>{document.getElementById('d-perm-bar')?.remove();if(p==='granted')toast('✅ Notifications enabled!')})"
+      style="background:#0284C7;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0">Allow</button>
+    <button onclick="document.getElementById('d-perm-bar')?.remove()"
+      style="background:rgba(255,255,255,.1);color:rgba(255,255,255,.5);border:none;border-radius:8px;padding:8px;font-size:12px;cursor:pointer">✕</button>`;
+  document.body.appendChild(bar);
+}
+
+// ── Init notification system ──────────────────────────────────
+function initNotifications(){
+  loadNotifHistory();
+  // Show permission banner after 3 seconds
+  setTimeout(showPermissionBanner, 3000);
+  // Poll for new loads and chat replies every 30 seconds
+  _notifPollInterval = setInterval(()=>{
+    pollForNewLoads();
+    checkHOSAlerts();
+    pollForChatReplies();
+  }, 30000);
+  // Also check immediately
+  setTimeout(pollForNewLoads, 1500);
+  // Listen for BroadcastChannel messages from office app (same browser)
+  if('BroadcastChannel' in window){
+    const bc = new BroadcastChannel('parchies-notif');
+    bc.onmessage = e => {
+      const { driverId, title, message, payload } = e.data||{};
+      if(driverId && driverId !== dApp.driverId) return;
+      triggerNotification(title||'New Notification', message||'', payload||{});
+    };
+  }
+}
+
+</script>
+</body>
+</html>
